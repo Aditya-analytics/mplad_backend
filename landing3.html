@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MPLADS AI — Intelligent Monitoring & Analytics</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       REFINED MINIMALISM & FLUID MOTION (APPLE-ESQUE)
+    ============================================================ */
+    :root {
+      --bg: #F5F5F7;
+      --surface: #FFFFFF;
+      --text-main: #1D1D1F;
+      --text-muted: #86868B;
+      --border-subtle: #E5E5EA;
+      --accent-blue: #0071E3;
+      --accent-green: #34C759;
+      --accent-red: #FF3B30;
+      
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      --shadow-float: 0 20px 40px rgba(0, 0, 0, 0.06);
+      --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.03);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* TYPOGRAPHY */
+    h1 {
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+    }
+
+    h2 {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 600;
+      letter-spacing: -0.03em;
+    }
+
+    .eyebrow {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    /* LAYOUT & UTILS */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0 4rem;
+    }
+
+    .section { padding: 8rem 0; }
+
+    /* ANIMATIONS */
+    .reveal-up {
+      opacity: 0;
+      transform: translateY(30px) scale(0.98);
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal-up.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      background: rgba(245, 245, 247, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .nav-brand { font-weight: 600; font-size: 1.1rem; letter-spacing: -0.02em; }
+    .nav-status { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-muted); }
+    .status-dot { width: 8px; height: 8px; background: var(--accent-green); border-radius: 50%; box-shadow: 0 0 10px var(--accent-green); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+      padding-top: 80px;
+      padding-bottom: 40px;
+      position: relative;
+    }
+
+    .hero-text-wrap { 
+      max-width: 600px;
+      justify-self: start;
+      text-align: left;
+      margin-left: 0;
+      z-index: 2; 
+    }
+    
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      margin-top: 1.5rem;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 2.5rem;
+    }
+
+    .btn-primary {
+      background: var(--text-main);
+      color: var(--surface);
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      padding: 1rem 2rem;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-secondary:hover {
+      background: rgba(0,0,0,0.05);
+    }
+
+    /* HERO DASHBOARD */
+    .hero-dashboard {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 550px;
+      justify-self: end;
+      box-shadow: var(--shadow-float);
+      text-align: left;
+      overflow: hidden;
+      z-index: 2;
+      padding: 2rem;
+    }
+    .dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .dash-stat {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .alert-stat {
+      background: #FFEEEE;
+      border-color: #FFCDD2;
+      grid-column: span 2;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .stat-trend {
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    .trend-up { color: var(--accent-green); }
+    
+    .dash-chart {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 1.25rem;
+    }
+    .chart-title {
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+    .progress-bg {
+      height: 8px;
+      background: var(--border-subtle);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent-blue);
+      border-radius: 4px;
+      animation: fillBar 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      width: 0;
+    }
+    @keyframes fillBar { to { width: 78%; } }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+    .pulse { animation: pulse 2s infinite; }
+
+    /* STICKY PIPELINE */
+    .pipeline-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: flex-start;
+    }
+    .pipeline-sticky {
+      position: sticky;
+      top: 150px;
+    }
+    .pipeline-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .pipe-card {
+      background: var(--surface);
+      padding: 3rem;
+      border-radius: 24px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-subtle);
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .pipe-card:hover {
+      transform: scale(1.02);
+      box-shadow: var(--shadow-float);
+    }
+    .pipe-num {
+      font-family: var(--font-mono);
+      color: var(--accent-blue);
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .pipe-name { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .pipe-desc { color: var(--text-muted); font-size: 1.05rem; }
+
+    /* REFINED FEATURES BENTO */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 2rem;
+    }
+    .b-card {
+      background: var(--surface);
+      border-radius: 24px;
+      padding: 3rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+    }
+    .b-span-4 { grid-column: span 4; }
+    .b-span-8 { grid-column: span 8; }
+    .b-span-6 { grid-column: span 6; }
+    .b-span-12 { grid-column: span 12; }
+
+    .b-score {
+      font-size: 5rem;
+      font-weight: 300;
+      color: var(--accent-green);
+      line-height: 1;
+      margin-top: auto;
+      font-family: var(--font-sans);
+      letter-spacing: -0.05em;
+    }
+    
+    .ai-bubble {
+      background: var(--bg);
+      padding: 1.5rem;
+      border-radius: 16px;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+    }
+    
+    .diff-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+    .diff-del { background: #FFEEEE; color: var(--accent-red); text-decoration: line-through; }
+    .diff-add { background: #E8F8F5; color: var(--accent-green); }
+
+    /* UPLOAD & INTEGRATION */
+    .integration-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      background: var(--surface);
+      border-radius: 32px;
+      padding: 4rem;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .upload-zone {
+      background: var(--bg);
+      border: 2px dashed var(--border-subtle);
+      border-radius: 24px;
+      padding: 4rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .upload-zone:hover {
+      border-color: var(--accent-blue);
+      background: #F8F9FA;
+    }
+
+    /* FOOTER MARQUEE */
+    .marquee-wrap {
+      background: var(--surface);
+      padding: 2rem 0;
+      overflow: hidden;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .marquee {
+      display: flex;
+      white-space: nowrap;
+      animation: slide 20s linear infinite;
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--text-muted);
+    }
+    .marquee span { margin: 0 3rem; }
+    @keyframes slide {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    @media(max-width: 900px) {
+      .container { padding: 0 1.5rem; }
+      nav { padding: 0 1.5rem; }
+      
+      .hero { 
+        flex-direction: column; 
+        text-align: left; 
+        margin-top: 0;
+        padding-top: 100px;
+        gap: 3rem;
+      }
+      .hero-text-wrap { margin: 0; text-align: left; max-width: 100%; }
+      .hero-dashboard { max-width: 100%; padding: 1.5rem; }
+      .dash-grid { grid-template-columns: 1fr; }
+      .alert-stat { grid-column: span 1; }
+      .hero-btns { justify-content: flex-start; flex-direction: column; width: 100%; }
+      .hero-btns button { width: 100%; }
+      
+      .section { padding: 4rem 0; }
+      .pipeline-wrapper { grid-template-columns: 1fr; gap: 2rem; }
+      .pipeline-sticky { position: static; margin-bottom: 1rem; }
+      .pipe-card { padding: 1.5rem; }
+      
+      .b-span-4, .b-span-8, .b-span-6 { grid-column: span 12; }
+      .b-card { padding: 1.5rem; }
+      .b-score { font-size: 3.5rem; }
+      
+      .integration-wrapper { grid-template-columns: 1fr; padding: 1.5rem; gap: 2rem; border-radius: 20px; }
+      .upload-zone { padding: 2rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-brand">MPLADS AI</div>
+    <div class="nav-status">
+      <div class="status-dot"></div>
+      System Active
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero container">
+    <div class="hero-text-wrap reveal-up">
+      <span class="eyebrow">Module_01: Analytics & Alerts</span>
+      <h1>Smart monitoring.<br>Transparent execution.</h1>
+      <p>An AI-powered platform leveraging machine learning to detect anomalies, fraud, and inefficiencies in the MPLAD Scheme. Early identification of cost overruns and duplicate works.</p>
+      <div class="hero-btns">
+        <button class="btn-primary">Launch Platform</button>
+        <button class="btn-secondary">Request Demo</button>
+      </div>
+    </div>
+
+    <div class="hero-dashboard reveal-up" style="transition-delay: 0.2s;">
+      <div class="dash-header">
+        <div style="font-weight: 600; font-size: 1rem;">National MPLADS Summary</div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span class="status-dot pulse"></span>
+          <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Live Sync</span>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-stat">
+          <div class="stat-label">Total Funds Disbursed</div>
+          <div class="stat-value">₹3,950 Cr</div>
+          <div class="stat-trend trend-up">↑ 12% vs last year</div>
+        </div>
+        <div class="dash-stat">
+          <div class="stat-label">Works Completed</div>
+          <div class="stat-value">48,210</div>
+          <div class="stat-trend" style="color: var(--text-muted);">Across 543 constituencies</div>
+        </div>
+        <div class="dash-stat alert-stat">
+          <div class="stat-label" style="color: var(--accent-red);">AI-Detected High-Risk Alerts</div>
+          <div class="stat-value" style="color: var(--accent-red);">142</div>
+          <div class="stat-trend" style="color: var(--text-main); font-weight: 500;">Requires immediate authority review</div>
+        </div>
+      </div>
+      <div class="dash-chart">
+        <div class="chart-title">Fund Utilization (YTD)</div>
+        <div class="progress-bg">
+          <div class="progress-fill"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; font-weight: 500;">
+          <span>0%</span>
+          <span>78% Utilized</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PIPELINE -->
+  <section class="section container" style="margin-top: 5rem;">
+    <div class="pipeline-wrapper">
+      <div class="pipeline-sticky reveal-up">
+        <span class="eyebrow">Monitoring Pipeline</span>
+        <h2>End-to-end oversight.</h2>
+        <p style="color: var(--text-muted); margin-top: 1rem; font-size: 1.1rem; max-width: 400px;">
+          We continuously ingest project data to identify irregularities, enforce compliance, and empower decision-makers.
+        </p>
+      </div>
+      
+      <div class="pipeline-steps">
+        <div class="pipe-card reveal-up">
+          <span class="pipe-num">01 // INGEST</span>
+          <div class="pipe-name">Data Integration</div>
+          <div class="pipe-desc">Aggregate sanctions, expenditures, and progress reports from multiple nodes.</div>
+        </div>
+        <div class="pipe-card reveal-up">
+          <span class="pipe-num">02 // ANALYZE</span>
+          <div class="pipe-name">Trend Analysis</div>
+          <div class="pipe-desc">Profile fund utilization patterns across districts and agencies.</div>
+        </div>
+        <div class="pipe-card reveal-up">
+          <span class="pipe-num">03 // DETECT</span>
+          <div class="pipe-name">Anomaly & Fraud Engine</div>
+          <div class="pipe-desc">Flag duplicate works, cost overruns, and deviations using ML models.</div>
+        </div>
+        <div class="pipe-card reveal-up">
+          <span class="pipe-num">04 // ALERT</span>
+          <div class="pipe-name">Risk-Based Warnings</div>
+          <div class="pipe-desc">Generate real-time early warnings for critical delays or potential misuse.</div>
+        </div>
+        <div class="pipe-card reveal-up">
+          <span class="pipe-num">05 // VALIDATE</span>
+          <div class="pipe-name">Compliance Checks</div>
+          <div class="pipe-desc">Automated matching against established MPLADS guidelines and norms.</div>
+        </div>
+        <div class="pipe-card reveal-up">
+          <span class="pipe-num">06 // REPORT</span>
+          <div class="pipe-name">Stakeholder Insights</div>
+          <div class="pipe-desc">Targeted briefs for MPs, State Nodal Authorities, and District Authorities.</div>
+        </div>
+        <div class="pipe-card reveal-up">
+          <span class="pipe-num">07 // VISUALIZE</span>
+          <div class="pipe-name">Command Dashboards</div>
+          <div class="pipe-desc">Interactive views for transparent accountability and tracking asset creation.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section container">
+    <div class="reveal-up" style="margin-bottom: 4rem; text-align: center;">
+      <span class="eyebrow">Platform Capabilities</span>
+      <h2>Insights that drive action.</h2>
+    </div>
+
+    <div class="bento-grid">
+      <!-- Quality Score -> Risk Score -->
+      <div class="b-card b-span-4 reveal-up">
+        <span class="eyebrow">Risk Assessment</span>
+        <h3 style="font-size: 1.5rem;">Compliance Score</h3>
+        <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.95rem;">Real-time index evaluating adherence to MPLADS guidelines and fund norms.</p>
+        <div style="margin-top: auto;">
+          <div class="b-score">98<span style="font-size: 1.5rem; color: var(--text-muted);">%</span></div>
+          <div style="font-size: 0.85rem; color: var(--accent-green); font-weight: 500; margin-top: 0.5rem;">Status: Optimal Compliance</div>
+        </div>
+      </div>
+
+      <!-- AI Planner -> Anomaly Engine -->
+      <div class="b-card b-span-8 reveal-up" style="transition-delay: 0.1s;">
+        <span class="eyebrow">AI Detection</span>
+        <h3 style="font-size: 1.5rem;">Irregularity Spotting</h3>
+        <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.95rem;">Machine learning models proactively identify potential fraud and inefficiencies.</p>
+        <div class="ai-bubble" style="border-left: 4px solid var(--accent-red);">
+          <strong style="color: var(--accent-red);">Critical Alert:</strong> Exact duplicate work entry detected in Sector 4 [ID: #W-8472]. Flagged for review.
+        </div>
+        <div class="ai-bubble" style="border-left: 4px solid var(--accent-blue);">
+          <strong style="color: var(--accent-blue);">System Insight:</strong> 15% aggregate cost overrun trend identified across 3 implementing agencies in Q2.
+        </div>
+      </div>
+
+      <!-- Diffs -> Trend comparison -->
+      <div class="b-card b-span-8 reveal-up">
+        <span class="eyebrow">Pattern Tracking</span>
+        <h3 style="font-size: 1.5rem;">Expenditure Tracking</h3>
+        <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.95rem;">Track deviations between estimated costs and actual disbursements.</p>
+        <div style="margin-top: 1.5rem; background: var(--bg); border-radius: 12px; overflow: hidden; font-family: var(--font-mono); font-size: 0.9rem; border: 1px solid var(--border-subtle);">
+          <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">Est. Budget</span>
+            <span style="color: var(--text-main);">₹5,00,000</span>
+          </div>
+          <div style="padding: 12px 16px; background: #FFEEEE; color: var(--accent-red); display: flex; justify-content: space-between; font-weight: 500;">
+            <span>Actual Disbursed</span>
+            <span>₹7,50,000</span>
+          </div>
+          <div style="padding: 10px 16px; display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); background: var(--surface);">
+            <span>Status: <span style="color: var(--accent-red); font-weight: 600;">OVERRUN DETECTED</span></span>
+            <span>+50.0% Variance</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exports -->
+      <div class="b-card b-span-4 reveal-up" style="transition-delay: 0.1s;">
+        <span class="eyebrow">Reporting</span>
+        <h3 style="font-size: 1.5rem;">Decision Support</h3>
+        <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 0.95rem;">Generate automated insights for authorities.</p>
+        <div style="margin-top: auto;">
+          <div style="padding: 1rem; background: var(--bg); border-radius: 12px; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; border: 1px solid var(--border-subtle);">↓ district_risk_report.pdf</div>
+          <div style="padding: 1rem; background: var(--bg); border-radius: 12px; font-weight: 500; font-size: 0.9rem; border: 1px solid var(--border-subtle);">↓ anomaly_alerts.csv</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- UPLOAD -->
+  <section class="section container">
+    <div class="integration-wrapper">
+      <div class="integration-text reveal-up">
+        <span class="eyebrow">Data Integration</span>
+        <h2>Connect. Analyze. Secure.</h2>
+        <p style="color: var(--text-muted); margin: 1rem 0 2rem; max-width: 450px;">
+          Seamlessly sync your MPLADS project datasets or establish secure connections with institutional APIs. The platform instantly analyzes implementation data, evaluates compliance, and flags high-risk cases for immediate review.
+        </p>
+        <ul style="list-style: none; padding: 0; margin-bottom: 2rem; color: var(--text-main); font-weight: 500;">
+          <li style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <div style="width: 20px; height: 20px; border-radius: 50%; background: var(--accent-green); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">✓</div> 
+            End-to-end encryption
+          </li>
+          <li style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <div style="width: 20px; height: 20px; border-radius: 50%; background: var(--accent-green); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">✓</div> 
+            Real-time API synchronization
+          </li>
+          <li style="margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <div style="width: 20px; height: 20px; border-radius: 50%; background: var(--accent-green); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px;">✓</div> 
+            Automated schema mapping
+          </li>
+        </ul>
+      </div>
+      
+      <div class="upload-zone reveal-up" style="transition-delay: 0.2s;">
+        <h3 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Upload Dataset</h3>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 2rem;">Drag and drop your financial or project reports here.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem;">
+          <span style="background: var(--surface); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border-subtle);">EXCEL</span>
+          <span style="background: var(--surface); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border-subtle);">CSV</span>
+          <span style="background: var(--surface); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--border-subtle);">JSON</span>
+        </div>
+        <button class="btn-primary" style="margin-top: 0; width: 100%;">Select Files</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee">
+      <span>EARLY WARNING MECHANISMS</span> <span>·</span>
+      <span>FRAUD DETECTION</span> <span>·</span>
+      <span>COMPLIANCE MONITORING</span> <span>·</span>
+      <span>TRANSPARENT EXECUTION</span> <span>·</span>
+      <span>EARLY WARNING MECHANISMS</span> <span>·</span>
+      <span>FRAUD DETECTION</span> <span>·</span>
+      <span>COMPLIANCE MONITORING</span> <span>·</span>
+      <span>TRANSPARENT EXECUTION</span> <span>·</span>
+    </div>
+  </div>
+
+  <script>
+    // Smooth scroll reveal observer
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.reveal-up').forEach(el => observer.observe(el));
+
+    // Dashboard animation logic is handled via CSS keyframes
+  </script>
+</body>
+</html>
