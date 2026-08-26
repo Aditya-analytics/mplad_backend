@@ -1,5 +1,14 @@
-# mplad_backend
-Here is an end-to-end breakdown and proposed solution for developing an AI-powered monitoring platform for the MPLADS scheme.
+# SIH26102: MPLADS AI-Monitoring Platform (MoSPI)
+
+## Official Problem Statement
+**Description:** Develop an AI-powered monitoring and analytics platform for MPLADS that leverages Machine Learning (ML), Artificial Intelligence (AI), and advanced data analytics to identify trend, anomalies, irregularities, and potential fraud in fund utilization and project execution. The solution should analyze data relating to sanctions, expenditures, cost estimates, work progress, payments, and asset creation to detect unusual patterns, cost overruns, duplicate works, delayed projects, and deviations from established norms. The system should generate risk-based alerts, predictive insights, and decision-support dashboards for Members of Parliament, State Nodal Authorities, District Authorities, and the Ministry. The platform should also facilitate automated compliance monitoring, trend analysis, and early warning mechanisms to improve transparency, accountability, and efficiency in the implementation of MPLADS works across the country.
+
+**Expected Solution:** The proposed solution should be an AI-powered platform that helps monitor MPLADS works and fund utilization in a smarter and more efficient manner. By analyzing data related to project approvals, expenditures, payments, work progress, and completion status, the system should be able to identify unusual patterns, delays, cost overruns, duplicate works, and potential cases of misuse of funds. It should automatically generate alerts and highlight high-risk cases that require attention from the concerned authorities. The platform should provide easy-to-understand dashboards and insights to Members of Parliament, State Nodal Authorities, District Authorities, and the Ministry, enabling them to make informed decisions and take timely corrective action. By leveraging artificial intelligence and data analytics, the solution should enhance transparency, strengthen accountability, reduce manual monitoring efforts, and support more effective implementation of MPLADS works across the country.
+
+---
+
+## Proposed Solution Architecture
+Here is an end-to-end breakdown and proposed solution for developing the AI-powered monitoring platform for the MPLADS scheme.
 
 This solution is structured to be practical, scalable, and directly address the problem of detecting fraud, anomalies, and inefficiencies.
 
