@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MPLADS AI — Live Dashboard</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* REFINED MINIMALISM (APPLE-ESQUE) */
+    :root {
+      --bg: #F5F5F7;
+      --surface: #FFFFFF;
+      --text-main: #1D1D1F;
+      --text-muted: #86868B;
+      --border-subtle: #E5E5EA;
+      --accent-blue: #0071E3;
+      --accent-green: #34C759;
+      --accent-red: #FF3B30;
+      
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      --shadow-card: 0 4px 14px rgba(0, 0, 0, 0.03);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      padding-top: 80px;
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      background: rgba(245, 245, 247, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      padding: 0 2rem;
+      z-index: 100;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .logo {
+      font-weight: 600;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      margin-bottom: 0.5rem;
+    }
+    
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      margin-bottom: 3rem;
+    }
+
+    /* STATS GRID */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border-radius: 18px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-subtle);
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--accent-red);
+      letter-spacing: -0.04em;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    /* TABLES */
+    .data-section {
+      background: var(--surface);
+      border-radius: 24px;
+      padding: 2rem;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 3rem;
+    }
+
+    .data-section h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    td.mono {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #FFEBEA;
+      color: var(--accent-red);
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">MPLADS AI Engine</div>
+  </nav>
+
+  <div class="container">
+    <h1>Live Audit Dashboard</h1>
+    <p class="subtitle">Real-time anomaly detection across 77,000+ government projects.</p>
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-dupes">...</div>
+        <div class="stat-label">Ghost Projects</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-costs">...</div>
+        <div class="stat-label">Cost Outliers</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-delays">...</div>
+        <div class="stat-label">Stalled Projects</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-rules">...</div>
+        <div class="stat-label">Rule Violations</div>
+      </div>
+    </div>
+
+    <!-- COST ANOMALIES TABLE -->
+    <div class="data-section">
+      <h2>🚨 Top Financial Overruns (Isolation Forest)</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Project ID</th>
+              <th>State</th>
+              <th>Category</th>
+              <th>Requested Amount (₹)</th>
+              <th>Category Median (₹)</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody id="cost-table-body">
+            <tr><td colspan="6" style="text-align:center;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DELAYED PROJECTS TABLE -->
+    <div class="data-section">
+      <h2>⏳ Chronically Delayed (Random Forest)</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Project ID</th>
+              <th>State</th>
+              <th>Sanctioned Budget (₹)</th>
+              <th>AI Predicted Days</th>
+              <th>Actual Elapsed Days</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="delay-table-body">
+            <tr><td colspan="6" style="text-align:center;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GHOST PROJECTS TABLE -->
+    <div class="data-section">
+      <h2>👻 Ghost Projects (NLP Duplicates)</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Project 1 ID</th>
+              <th>Project 2 ID</th>
+              <th>State</th>
+              <th>Rule Flag</th>
+              <th>Similarity</th>
+              <th>Identical Description</th>
+            </tr>
+          </thead>
+          <tbody id="dupe-table-body">
+            <tr><td colspan="6" style="text-align:center;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COMPLIANCE VIOLATIONS TABLE -->
+    <div class="data-section">
+      <h2>⚖️ Financial Rule Violations (Logic Engine)</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Project ID</th>
+              <th>State</th>
+              <th>Violation Type</th>
+              <th>Amount in Question (₹)</th>
+              <th>Detail</th>
+            </tr>
+          </thead>
+          <tbody id="rules-table-body">
+            <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const API_BASE = "http://127.0.0.1:8000/api/v1";
+
+    async function loadDashboard() {
+      try {
+        // 1. Fetch Stats
+        const statsRes = await fetch(`${API_BASE}/stats/overview`);
+        const stats = await statsRes.json();
+        
+        document.getElementById('stat-dupes').innerText = stats.total_duplicates.toLocaleString();
+        document.getElementById('stat-costs').innerText = stats.total_cost_anomalies.toLocaleString();
+        document.getElementById('stat-delays').innerText = stats.total_delayed.toLocaleString();
+        document.getElementById('stat-rules').innerText = stats.total_compliance_violations.toLocaleString();
+
+        // 2. Fetch Cost Anomalies
+        const costsRes = await fetch(`${API_BASE}/anomalies/costs?limit=5`);
+        const costsData = await costsRes.json();
+        
+        const costBody = document.getElementById('cost-table-body');
+        costBody.innerHTML = '';
+        costsData.data.forEach(item => {
+          costBody.innerHTML += `
+            <tr>
+              <td class="mono">${item.Project_ID || 'N/A'}</td>
+              <td>${item.State || 'Unknown'}</td>
+              <td><span class="badge">${item['Work category']}</span></td>
+              <td class="mono" style="color:var(--accent-red); font-weight:600;">₹ ${parseFloat(item['RECOMMENDED AMOUNT   ( ₹ )']).toLocaleString()}</td>
+              <td class="mono">₹ ${parseFloat(item.Category_Median_Cost).toLocaleString()}</td>
+              <td style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item['Work description']}</td>
+            </tr>
+          `;
+        });
+
+        // 3. Fetch Delays
+        const delayRes = await fetch(`${API_BASE}/anomalies/delays?limit=5`);
+        const delayData = await delayRes.json();
+        
+        const delayBody = document.getElementById('delay-table-body');
+        delayBody.innerHTML = '';
+        delayData.data.forEach(item => {
+          delayBody.innerHTML += `
+            <tr>
+              <td class="mono">${item.Project_ID || 'N/A'}</td>
+              <td>${item.State || 'Unknown'}</td>
+              <td class="mono">₹ ${parseFloat(item['RECOMMENDED AMOUNT   ( ₹ )'] || 0).toLocaleString()}</td>
+              <td class="mono">${Math.round(item.Predicted_Days)} Days</td>
+              <td class="mono" style="color:var(--accent-red); font-weight:600;">${item.Elapsed_Days} Days</td>
+              <td><span class="badge">${Math.round(item['Delay_Severity_%'])}% Delayed</span></td>
+            </tr>
+          `;
+        });
+
+        // 4. Fetch Ghost Projects (Duplicates)
+        const dupeRes = await fetch(`${API_BASE}/anomalies/duplicates?limit=5`);
+        const dupeData = await dupeRes.json();
+        
+        const dupeBody = document.getElementById('dupe-table-body');
+        dupeBody.innerHTML = '';
+        dupeData.data.forEach(item => {
+          dupeBody.innerHTML += `
+            <tr>
+              <td class="mono">${item.Project_1_ID}</td>
+              <td class="mono">${item.Project_2_ID}</td>
+              <td>${item.State}</td>
+              <td><span class="badge" style="background:#FFEBEA;">${item.Rule_Flag}</span></td>
+              <td class="mono">${(item.Similarity_Score * 100).toFixed(1)}%</td>
+              <td style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.Project_1_Desc}</td>
+            </tr>
+          `;
+        });
+
+        // 5. Fetch Compliance Violations
+        const ruleRes = await fetch(`${API_BASE}/compliance?limit=5`);
+        const ruleData = await ruleRes.json();
+        
+        const ruleBody = document.getElementById('rules-table-body');
+        ruleBody.innerHTML = '';
+        ruleData.data.forEach(item => {
+          ruleBody.innerHTML += `
+            <tr>
+              <td class="mono">${item.Project_ID}</td>
+              <td>${item.State}</td>
+              <td style="color:var(--accent-red); font-weight:600;">${item.Violation_Type}</td>
+              <td class="mono" style="font-weight:700;">₹ ${parseFloat(item.Amount_In_Question).toLocaleString()}</td>
+              <td>${item.Detail}</td>
+            </tr>
+          `;
+        });
+
+      } catch (e) {
+        console.error("Error loading dashboard:", e);
+        alert("Make sure the FastAPI backend is running on http://127.0.0.1:8000 !");
+      }
+    }
+
+    // Initialize
+    loadDashboard();
+  </script>
+</body>
+</html>
