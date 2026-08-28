@@ -1,0 +1,17 @@
+export const PROJECT_STATUSES = {
+  SANCTIONED: 'SANCTIONED',
+  ONGOING: 'ONGOING',
+  COMPLETED: 'COMPLETED',
+  DELAYED: 'DELAYED',
+  FLAGGED: 'FLAGGED',
+  UNDER_INVESTIGATION: 'UNDER_INVESTIGATION',
+};
+
+export const STATUS_COLOR_MAP = {
+  SANCTIONED: { bg: '#E0F2FE', text: '#0288D1' },
+  ONGOING: { bg: '#E0E7FF', text: '#4338CA' },
+  COMPLETED: { bg: '#D1FAE5', text: '#059669' },
+  DELAYED: { bg: '#FEF3C7', text: '#D97706' },
+  FLAGGED: { bg: '#FFEDD5', text: '#EA580C' },
+  UNDER_INVESTIGATION: { bg: '#FEE2E2', text: '#DC2626' },
+};
