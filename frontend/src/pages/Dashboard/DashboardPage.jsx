@@ -500,7 +500,7 @@ export function DashboardPage() {
                   </td>
                 </tr>
               ) : (
-                filteredWorks.map((w) => {
+                filteredWorks.map((w, index) => {
                   const sanctioned = typeof w.sanctionedAmount === 'number' ? formatCurrency(w.sanctionedAmount) : (w.sanctioned || '₹2.40 Cr');
                   const spent = typeof w.utilizedAmount === 'number' ? formatCurrency(w.utilizedAmount) : (w.spent || '₹2.10 Cr');
                   const progress = w.physicalProgress !== undefined ? w.physicalProgress : (w.progress || 45);
@@ -511,6 +511,8 @@ export function DashboardPage() {
                   return (
                     <tr
                       key={w.id}
+                      className="animate-fade-in-up"
+                      style={{ animationDelay: `${index * 0.03}s` }}
                       onClick={() => {
                         if (onSelectWork) onSelectWork(w);
                       }}

@@ -153,12 +153,15 @@ export function InspectModal({ isOpen, onClose, data, type }) {
     <div className="modal-overlay" style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
       background: 'rgba(10, 25, 47, 0.7)', display: 'flex', alignItems: 'center', 
-      justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(4px)'
+      justifyContent: 'center', zIndex: 9999, backdropFilter: 'blur(4px)',
+      opacity: isOpen ? 1 : 0, transition: 'opacity 0.3s ease-in-out'
     }} onClick={onClose}>
       <div className="modal-container" style={{
         background: '#fff', width: '90%', maxWidth: '700px', 
         borderRadius: '8px', boxShadow: '0 15px 35px rgba(0,0,0,0.2)',
-        display: 'flex', flexDirection: 'column', maxHeight: '90vh'
+        display: 'flex', flexDirection: 'column', maxHeight: '90vh',
+        transform: isOpen ? 'scale(1)' : 'scale(0.95)',
+        transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
       }} onClick={e => e.stopPropagation()}>
         
         <div className="modal-header" style={{

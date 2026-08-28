@@ -29,11 +29,18 @@ export function WorkDetailModal({ work, isOpen, onClose }) {
     : (work.score || 88);
 
   const reasoning = work.aiRiskAnalysis?.overallAssessment || work.reasoning || 
-    'High expenditure-to-physical progress mismatch. Funds released while site physical completion is lagging. Geofenced telemetry indicates timeline stalling.';
+    `Critical AI Alert: The project "${work.projectName || work.title || work.id}" in ${work.district} has utilized ${spentText} against a sanctioned amount of ${sanctionedText}, yet physical progress remains stagnant at ${progressVal}%. Combined with an active schedule delay of ${delayVal} days, the AI has assigned a severe risk score of ${riskScore}/100. Immediate field inspection is advised to prevent further fund leakage.`;
 
   return (
-    <div className="modal-overlay show" onClick={onClose}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+    <div className={`modal-overlay ${isOpen ? 'show' : ''}`} style={{ 
+      opacity: isOpen ? 1 : 0, 
+      visibility: isOpen ? 'visible' : 'hidden', 
+      transition: 'opacity 0.3s ease, visibility 0.3s ease' 
+    }} onClick={onClose}>
+      <div className="modal-container" style={{ 
+        transform: isOpen ? 'scale(1) translateY(0)' : 'scale(0.95) translateY(-20px)', 
+        transition: 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+      }} onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title">{work.id}</div>
           <button className="modal-close-btn" onClick={onClose} title="Close Modal">
