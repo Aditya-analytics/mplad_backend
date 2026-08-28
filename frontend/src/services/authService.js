@@ -20,8 +20,10 @@ export const authService = {
 
   async getCurrentUser() {
     if (environment.enableMockApi) {
-      const stored = localStorage.getItem('mplads_user');
-      return stored ? JSON.parse(stored) : null;
+      // Always clear session on app start to enforce login page
+      localStorage.removeItem('mplads_auth_token');
+      localStorage.removeItem('mplads_user');
+      return null;
     }
     const response = await apiClient.get('/auth/me');
     return response.data;

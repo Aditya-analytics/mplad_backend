@@ -1,8 +1,15 @@
 import React from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, Navigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
+import { useAuth } from '../hooks/useAuth';
 
 export function PublicLayout() {
+  const { isAuthenticated, loading } = useAuth();
+
+  // If user is already logged in, send them straight to dashboard
+  if (!loading && isAuthenticated) {
+    return <Navigate to={ROUTES.DASHBOARD} replace />;
+  }
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--ash-bg)', color: 'var(--text-main)', fontFamily: "'Inter', sans-serif" }}>
       <header style={{ background: 'var(--navy-primary)', color: '#ffffff', borderBottom: '3px solid var(--saffron)', padding: '0.8rem 1.5rem' }}>

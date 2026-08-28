@@ -140,9 +140,16 @@ export function ProjectsPage() {
                       <td>{p.constituency || `${p.district} Central`}</td>
                       <td style={{ fontWeight: 600 }}>{sanctioned}</td>
                       <td>
-                        <span className={`badge-risk ${risk}`}>
-                          {p.riskLevel || p.status}
-                        </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', alignItems: 'flex-start' }}>
+                          <span className={`badge-risk ${risk}`}>
+                            {p.riskLevel || p.status}
+                          </span>
+                          {p.riskScore !== undefined && (
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                              Score: {p.riskScore}/100
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td>
                         <button

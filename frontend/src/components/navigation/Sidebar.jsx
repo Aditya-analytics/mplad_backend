@@ -10,16 +10,17 @@ export function Sidebar({ onToggleCollapse, onCloseMobile }) {
       category: 'Main Dashboard',
       items: [
         { label: 'Overview', path: ROUTES.DASHBOARD, icon: 'fa-chart-pie' },
-        { label: 'AI Risk Monitor', path: ROUTES.ANOMALIES, icon: 'fa-microchip', badge: 'HIGH' },
-        { label: 'Geographic Intel', path: `${ROUTES.DASHBOARD}#geographic-intelligence`, icon: 'fa-map-location-dot' },
+        { label: 'Works Monitoring', path: ROUTES.PROJECTS, icon: 'fa-list-check' },
       ],
     },
     {
-      category: 'Monitoring & Analytics',
+      category: 'Intelligence & Analytics',
       items: [
-        { label: 'Works Monitoring', path: ROUTES.PROJECTS, icon: 'fa-list-check' },
-        { label: 'Fund Utilization', path: ROUTES.ANALYTICS, icon: 'fa-indian-rupee-sign' },
-        { label: 'Fraud & Anomalies', path: ROUTES.ANOMALIES, icon: 'fa-triangle-exclamation' },
+        { label: 'Duplicate Radar (NLP)', path: ROUTES.ANOMALIES_DUPLICATES, icon: 'fa-copy', badge: 'HIGH' },
+        { label: 'Cost Outliers (ML)', path: ROUTES.ANOMALIES_COSTS, icon: 'fa-money-bill-wave' },
+        { label: 'Delay Predictor', path: ROUTES.ANOMALIES_DELAYS, icon: 'fa-clock-rotate-left' },
+        { label: 'Compliance Audit', path: ROUTES.ANOMALIES_COMPLIANCE, icon: 'fa-scale-balanced', badge: 'CRITICAL' },
+        { label: 'Financial Analytics', path: ROUTES.ANALYTICS, icon: 'fa-chart-line' },
         { label: 'Alert Center', path: ROUTES.ALERTS, icon: 'fa-bell', badge: '3' },
       ],
     },
@@ -27,9 +28,7 @@ export function Sidebar({ onToggleCollapse, onCloseMobile }) {
       category: 'Governance',
       items: [
         { label: 'Report Generator', path: ROUTES.REPORTS, icon: 'fa-file-invoice' },
-        { label: 'Compliance', path: `${ROUTES.PROFILE}#compliance`, icon: 'fa-clipboard-check' },
-        { label: 'Trend Analytics', path: ROUTES.ANALYTICS, icon: 'fa-chart-line' },
-        { label: 'Settings', path: `${ROUTES.PROFILE}#settings`, icon: 'fa-sliders' },
+        { label: 'Settings & Profile', path: ROUTES.PROFILE, icon: 'fa-user-shield' },
       ],
     },
   ];

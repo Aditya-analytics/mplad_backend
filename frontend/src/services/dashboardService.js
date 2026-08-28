@@ -1,32 +1,39 @@
 import apiClient from './apiClient';
 import { environment } from '../config/environment';
-import { MOCK_DASHBOARD_DATA } from '../mocks/dashboard';
 
 export const dashboardService = {
   async getSummary() {
-    if (environment.enableMockApi) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-      return MOCK_DASHBOARD_DATA.summary;
-    }
-    const response = await apiClient.get('/dashboard/summary');
-    return response.data;
+    const response = await apiClient.get('/stats/overview');
+    const data = response.data;
+    
+    // Convert total_disbursed (which is in Rupees) to Crores (1 Crore = 10,000,000)
+    const disbursedInCr = data.total_disbursed / 10000000;
+    
+    return {
+      totalProjects: data.total_projects,
+      flaggedProjects: data.total_duplicates + data.total_cost_anomalies + data.total_delayed,
+      criticalAlerts: data.total_compliance_violations,
+      totalDisbursed: `₹${disbursedInCr.toFixed(1)} Cr`,
+    };
   },
 
   async getRiskDistribution() {
-    if (environment.enableMockApi) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return MOCK_DASHBOARD_DATA.riskDistribution;
-    }
-    const response = await apiClient.get('/dashboard/risk-distribution');
-    return response.data;
+    const response = await apiClient.get('/stats/overview');
+    return response.data.risk_distribution || [];
   },
 
   async getStateMetrics() {
-    if (environment.enableMockApi) {
-      await new Promise((resolve) => setTimeout(resolve, 250));
-      return MOCK_DASHBOARD_DATA.stateMetrics;
-    }
-    const response = await apiClient.get('/dashboard/state-metrics');
-    return response.data;
+    const response = await apiClient.get('/stats/overview');
+    return response.data.state_metrics || [];
   },
+  
+  async getGeospatialData() {
+    const response = await apiClient.get('/stats/overview');
+    return response.data.geospatial_data || [];
+  },
+
+  async getNationalRisk() {
+    const response = await apiClient.get('/stats/overview');
+    return response.data.national_risk || { overall_score: 0, financial_score: 0, delay_score: 0, duplicate_score: 0 };
+  }
 };

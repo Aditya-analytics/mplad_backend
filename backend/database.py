@@ -11,7 +11,19 @@ class Database:
         print("Loading in-memory databases...")
         
         # Load datasets (replacing NaN with None for JSON serialization)
-        self.df_master = self._load_csv(self.master_path)
+        df = self._load_csv(self.master_path)
+        if not df.empty:
+            df = df.rename(columns={
+                'Project_ID': 'id',
+                'Work description': 'projectName',
+                'State': 'state',
+                'Constituency': 'constituency',
+                'Hon\'ble Members of Parliament': 'mpName',
+                'Sanction Amount ( ₹ )': 'sanctionedAmount',
+                'Fund Disbursed Amount ( ₹ )': 'utilizedAmount',
+                'Work Status': 'status'
+            })
+        self.df_master = df
         self.df_duplicates = self._load_csv(os.path.join(self.data_dir, 'flagged_duplicates.csv'))
         self.df_anomalies = self._load_csv(os.path.join(self.data_dir, 'cost_anomalies.csv'))
         self.df_delays = self._load_csv(os.path.join(self.data_dir, 'delayed_projects.csv'))

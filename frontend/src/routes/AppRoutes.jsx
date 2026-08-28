@@ -11,8 +11,11 @@ import { LoginPage } from '../pages/Login/LoginPage';
 import { DashboardPage } from '../pages/Dashboard/DashboardPage';
 import { ProjectsPage } from '../pages/Projects/ProjectsPage';
 import { ProjectDetailsPage } from '../pages/ProjectDetails/ProjectDetailsPage';
-import { AnomaliesPage } from '../pages/Anomalies/AnomaliesPage';
 import { AnomalyDetailsPage } from '../pages/Anomalies/AnomalyDetailsPage';
+import { DuplicatesPage } from '../pages/Anomalies/DuplicatesPage';
+import { CostsPage } from '../pages/Anomalies/CostsPage';
+import { DelaysPage } from '../pages/Anomalies/DelaysPage';
+import { CompliancePage } from '../pages/Anomalies/CompliancePage';
 import { AnalyticsPage } from '../pages/Analytics/AnalyticsPage';
 import { AlertsPage } from '../pages/Alerts/AlertsPage';
 import { ReportsPage } from '../pages/Reports/ReportsPage';
@@ -26,6 +29,7 @@ export function AppRoutes() {
     <Routes>
       {/* Public Routes */}
       <Route element={<PublicLayout />}>
+        <Route index element={<LandingPage />} />
         <Route path={ROUTES.LANDING} element={<LandingPage />} />
       </Route>
 
@@ -40,8 +44,11 @@ export function AppRoutes() {
           <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
           <Route path={ROUTES.PROJECTS} element={<ProjectsPage />} />
           <Route path={ROUTES.PROJECT_DETAILS} element={<ProjectDetailsPage />} />
-          <Route path={ROUTES.ANOMALIES} element={<AnomaliesPage />} />
-          <Route path="/app/anomalies/:anomalyId" element={<AnomalyDetailsPage />} />
+          <Route path={ROUTES.ANOMALIES_DUPLICATES} element={<DuplicatesPage />} />
+          <Route path={ROUTES.ANOMALIES_COSTS} element={<CostsPage />} />
+          <Route path={ROUTES.ANOMALIES_DELAYS} element={<DelaysPage />} />
+          <Route path={ROUTES.ANOMALIES_COMPLIANCE} element={<CompliancePage />} />
+          <Route path={ROUTES.ANOMALY_DETAILS} element={<AnomalyDetailsPage />} />
           <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
           <Route path={ROUTES.ALERTS} element={<AlertsPage />} />
           <Route path={ROUTES.REPORTS} element={<ReportsPage />} />

@@ -12,8 +12,7 @@ export function LogoutModal({ isOpen, onClose }) {
   const handleConfirmLogout = async () => {
     try {
       await logout();
-      onClose();
-      navigate(ROUTES.LOGIN);
+      navigate(ROUTES.LANDING);
     } catch (e) {
       onClose();
       navigate(ROUTES.LOGIN);

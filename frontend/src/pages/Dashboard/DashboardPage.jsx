@@ -6,27 +6,51 @@ import { LeafletMap } from '../../components/common/LeafletMap';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { ROUTES } from '../../constants/routes';
 
-const STATE_DATA = [
-  { name: "Maharashtra", works: 2480, sanctioned: "₹640 Cr", utilization: 82.4, delayed: 142, anomalies: 68, risk: "HIGH", color: "var(--risk-high)", bg: "var(--risk-high-bg)" },
-  { name: "Uttar Pradesh", works: 3820, sanctioned: "₹980 Cr", utilization: 76.1, delayed: 284, anomalies: 124, risk: "CRITICAL", color: "var(--risk-critical)", bg: "var(--risk-critical-bg)" },
-  { name: "Karnataka", works: 1940, sanctioned: "₹510 Cr", utilization: 84.8, delayed: 88, anomalies: 34, risk: "MODERATE", color: "var(--risk-moderate)", bg: "var(--risk-moderate-bg)" },
-  { name: "Rajasthan", works: 1760, sanctioned: "₹450 Cr", utilization: 89.2, delayed: 46, anomalies: 18, risk: "LOW", color: "var(--risk-low)", bg: "var(--risk-low-bg)" },
-  { name: "Tamil Nadu", works: 2150, sanctioned: "₹580 Cr", utilization: 88.5, delayed: 62, anomalies: 22, risk: "LOW", color: "var(--risk-low)", bg: "var(--risk-low-bg)" },
-  { name: "West Bengal", works: 2310, sanctioned: "₹610 Cr", utilization: 79.4, delayed: 154, anomalies: 76, risk: "HIGH", color: "var(--risk-high)", bg: "var(--risk-high-bg)" },
-  { name: "Gujarat", works: 1680, sanctioned: "₹440 Cr", utilization: 86.7, delayed: 52, anomalies: 24, risk: "MODERATE", color: "var(--risk-moderate)", bg: "var(--risk-moderate-bg)" },
-  { name: "Madhya Pradesh", works: 2200, sanctioned: "₹570 Cr", utilization: 81.2, delayed: 110, anomalies: 52, risk: "MODERATE", color: "var(--risk-moderate)", bg: "var(--risk-moderate-bg)" }
-];
-
 export function DashboardPage() {
   const navigate = useNavigate();
   const outletContext = useOutletContext();
   const onSelectWork = outletContext?.onSelectWork;
 
-  const { summary } = useDashboard();
+  const { summary, riskDist, stateMetrics, geospatialData, nationalRisk } = useDashboard();
   const { projects } = useProjects();
 
   // State selection for region details
-  const [selectedState, setSelectedState] = useState(STATE_DATA[0]);
+  const [selectedState, setSelectedState] = useState(null);
+
+  // Derive rich state objects from backend payloads for UI rendering
+  const displayStates = (stateMetrics || []).map(sm => {
+    const geo = (geospatialData || []).find(g => g.name === sm.state) || {};
+    const riskScore = geo.riskScore || 50;
+    let riskStr = "MODERATE";
+    let color = "var(--risk-moderate)";
+    let bg = "var(--risk-moderate-bg)";
+    
+    if (riskScore > 75) { riskStr = "CRITICAL"; color = "var(--risk-critical)"; bg = "var(--risk-critical-bg)"; }
+    else if (riskScore > 50) { riskStr = "HIGH"; color = "var(--risk-high)"; bg = "var(--risk-high-bg)"; }
+    else if (riskScore < 30) { riskStr = "LOW"; color = "var(--risk-low)"; bg = "var(--risk-low-bg)"; }
+    
+    return {
+      name: sm.state,
+      works: sm.works || 0,
+      sanctioned: sm.sanctioned || "₹0 Cr", 
+      utilization: sm.utilization || 0,
+      delayed: sm.delayed || 0, 
+      anomalies: sm.anomalies,
+      risk: riskStr,
+      score: riskScore,
+      color,
+      bg,
+      lat: geo.coordinates ? geo.coordinates[1] : 0,
+      lng: geo.coordinates ? geo.coordinates[0] : 0
+    };
+  });
+
+  // Set initial selected state once displayStates loads
+  useEffect(() => {
+    if (displayStates && displayStates.length > 0 && !selectedState) {
+      setSelectedState(displayStates[0]);
+    }
+  }, [displayStates, selectedState]);
 
   // Hero search
   const [heroSearch, setHeroSearch] = useState('');
@@ -141,6 +165,13 @@ export function DashboardPage() {
     }
   };
 
+
+  // Handle Map Selection
+  const handleMapSelect = (loc) => {
+    const matched = displayStates.find((s) => loc.name.includes(s.name));
+    if (matched) setSelectedState(matched);
+  };
+
   return (
     <section className="view-section active" id="view-overview">
       {/* HERO BANNER */}
@@ -155,59 +186,17 @@ export function DashboardPage() {
             Monitor fund allocations in real-time, detect financial anomalies, predict completion delays, and prevent duplicate works across all 543 Parliamentary constituencies.
           </p>
 
-          <div className="hero-search-wrapper" ref={heroSearchWrapperRef}>
-            <div className="hero-search-bar">
-              <i className="fa-solid fa-magnifying-glass"></i>
-              <input
-                type="text"
-                className="hero-search-input"
-                id="heroSearchInput"
-                placeholder="Search works, districts, MPs, sanctions or alerts (e.g. Pune, Hospital)..."
-                value={heroSearch}
-                onChange={(e) => setHeroSearch(e.target.value)}
-                onFocus={() => { if (heroSearch.trim()) setShowHeroDropdown(true); }}
-              />
-              <button
-                className="hero-search-btn"
-                id="heroSearchBtn"
-                onClick={() => {
-                  if (heroResults.length > 0 && onSelectWork) {
-                    onSelectWork(heroResults[0]);
-                  }
-                }}
-              >
-                Run Intelligence Search
-              </button>
-            </div>
-
-            <div className={`search-results-dropdown ${showHeroDropdown ? 'show' : ''}`} id="heroSearchResults">
-              <div className="search-result-group">Works & Locations</div>
-              {heroResults.length === 0 ? (
-                <div style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  No matching works found
-                </div>
-              ) : (
-                heroResults.map((m) => (
-                  <div
-                    key={m.id}
-                    className="search-result-item"
-                    onClick={() => {
-                      setShowHeroDropdown(false);
-                      setHeroSearch('');
-                      if (onSelectWork) onSelectWork(m);
-                    }}
-                  >
-                    <div>
-                      <div className="sri-title">{m.projectName || m.title}</div>
-                      <div className="sri-sub">{m.id} · {m.district}, {m.state}</div>
-                    </div>
-                    <span className={`badge-risk ${(m.riskLevel || m.risk || 'moderate').toLowerCase()}`}>
-                      {m.riskLevel || m.risk}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
+          <div style={{ marginTop: '1.5rem' }}>
+            <button
+              className="hero-search-btn"
+              style={{ fontSize: '1rem', padding: '0.8rem 1.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+              onClick={() => {
+                const tableEl = document.getElementById('worksRegistryTableCard');
+                if (tableEl) tableEl.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              <i className="fa-solid fa-play"></i> Start Monitoring Work
+            </button>
           </div>
         </div>
       </div>
@@ -229,9 +218,9 @@ export function DashboardPage() {
             <div className="kpi-icon green"><i className="fa-solid fa-vault"></i></div>
             <span className="kpi-trend down"><i className="fa-solid fa-arrow-up"></i> 80.5%</span>
           </div>
-          <div className="kpi-number">₹3,917 Cr</div>
-          <div className="kpi-label">Funds Utilized</div>
-          <div className="kpi-subtext"><i className="fa-solid fa-coins"></i> Total Sanctioned: ₹4,862 Cr</div>
+          <div className="kpi-number">{summary?.totalDisbursed || '₹0 Cr'}</div>
+          <div className="kpi-label">Funds Disbursed</div>
+          <div className="kpi-subtext"><i className="fa-solid fa-coins"></i> Live aggregation from master DB</div>
         </div>
 
         <div className="kpi-card">
@@ -247,12 +236,12 @@ export function DashboardPage() {
         <div className="kpi-card">
           <div className="kpi-top">
             <div className="kpi-icon red"><i className="fa-solid fa-triangle-exclamation"></i></div>
-            <span className="kpi-trend up"><i className="fa-solid fa-arrow-up"></i> 427</span>
+            <span className="kpi-trend up"><i className="fa-solid fa-arrow-up"></i> Alert</span>
           </div>
           <div className="kpi-number">{counts.anomalies.toLocaleString()}</div>
           <div className="kpi-label">AI Anomalies Flagged</div>
           <div className="kpi-subtext" style={{ color: 'var(--risk-critical)', fontWeight: 600 }}>
-            <i className="fa-solid fa-triangle-exclamation"></i> ₹84.6 Cr Financial Exposure
+            <i className="fa-solid fa-triangle-exclamation"></i> Requires Immediate Audit
           </div>
         </div>
       </div>
@@ -272,10 +261,10 @@ export function DashboardPage() {
       </div>
 
       <div className="state-scroll-container" id="stateCardsScroller">
-        {STATE_DATA.map((st) => (
+        {displayStates.map((st) => (
           <div
             key={st.name}
-            className={`state-card ${selectedState.name === st.name ? 'active' : ''}`}
+            className={`state-card ${selectedState?.name === st.name ? 'active' : ''}`}
             onClick={() => setSelectedState(st)}
           >
             <div className="state-card-header">
@@ -284,9 +273,9 @@ export function DashboardPage() {
                 {st.risk}
               </span>
             </div>
-            <div className="state-metric-row"><span>Total Works</span><span className="state-metric-val">{st.works.toLocaleString()}</span></div>
+            <div className="state-metric-row"><span>Sanctioned</span><span className="state-metric-val">{st.sanctioned}</span></div>
             <div className="state-metric-row"><span>Utilization</span><span className="state-metric-val">{st.utilization}%</span></div>
-            <div className="state-metric-row"><span>Anomalies</span><span className="state-metric-val" style={{ color: 'var(--risk-critical)' }}>{st.anomalies}</span></div>
+            <div className="state-metric-row"><span>Total Works</span><span className="state-metric-val">{st.works}</span></div>
             <div className="progress-bar-sm">
               <div className="progress-fill" style={{ width: `${st.utilization}%`, background: st.color }}></div>
             </div>
@@ -298,10 +287,8 @@ export function DashboardPage() {
       <div className="grid-2-1" id="geospatialMapCard">
         <div className="dashboard-card">
           <LeafletMap
-            onSelectLocation={(loc) => {
-              const matched = STATE_DATA.find((s) => loc.name.includes(s.name));
-              if (matched) setSelectedState(matched);
-            }}
+            locations={displayStates}
+            onSelectLocation={handleMapSelect}
           />
         </div>
 
@@ -310,35 +297,35 @@ export function DashboardPage() {
           <div className="region-detail-box" id="regionInfoBox">
             <div>
               <div className="region-detail-header">
-                <div className="rd-state-name" id="rdStateName">{selectedState.name}</div>
+                <div className="rd-state-name" id="rdStateName">{selectedState?.name || 'Loading...'}</div>
                 <span
                   className="rd-badge"
                   id="rdRiskBadge"
-                  style={{ background: selectedState.bg, color: selectedState.color }}
+                  style={{ background: selectedState?.bg || '#ccc', color: selectedState?.color || '#000' }}
                 >
-                  {selectedState.risk} RISK REGION
+                  {selectedState?.risk || 'UNKNOWN'} RISK REGION
                 </span>
               </div>
               <div className="stat-list">
                 <div className="stat-item">
                   <span className="stat-label"><i className="fa-solid fa-cubes"></i> Total Works:</span>
-                  <span className="stat-value" id="rdTotalWorks">{selectedState.works.toLocaleString()}</span>
+                  <span className="stat-value" id="rdTotalWorks">{selectedState?.works?.toLocaleString?.() || selectedState?.works || '0'}</span>
                 </div>
                 <div className="stat-item">
                   <span className="stat-label"><i className="fa-solid fa-indian-rupee-sign"></i> Sanctioned:</span>
-                  <span className="stat-value" id="rdSanctioned">{selectedState.sanctioned}</span>
+                  <span className="stat-value" id="rdSanctioned">{selectedState?.sanctioned || 'N/A'}</span>
                 </div>
                 <div className="stat-item">
                   <span className="stat-label"><i className="fa-solid fa-chart-line"></i> Utilization Rate:</span>
-                  <span className="stat-value" id="rdUtilization">{selectedState.utilization}%</span>
+                  <span className="stat-value" id="rdUtilization">{selectedState?.utilization || '0'}%</span>
                 </div>
                 <div className="stat-item">
                   <span className="stat-label"><i className="fa-solid fa-hourglass"></i> Delayed Works:</span>
-                  <span className="stat-value" id="rdDelayed" style={{ color: 'var(--risk-high)' }}>{selectedState.delayed}</span>
+                  <span className="stat-value" id="rdDelayed" style={{ color: 'var(--risk-high)' }}>{selectedState?.delayed || '0'}</span>
                 </div>
                 <div className="stat-item">
                   <span className="stat-label"><i className="fa-solid fa-bug"></i> Active Anomalies:</span>
-                  <span className="stat-value" id="rdAnomalies" style={{ color: 'var(--risk-critical)' }}>{selectedState.anomalies}</span>
+                  <span className="stat-value" id="rdAnomalies" style={{ color: 'var(--risk-critical)' }}>{selectedState?.anomalies || '0'}</span>
                 </div>
               </div>
             </div>
@@ -346,7 +333,8 @@ export function DashboardPage() {
             <button
               className="btn-primary"
               style={{ width: '100%', marginTop: '1rem' }}
-              onClick={() => handleInspectStateWorks(selectedState.name)}
+              onClick={() => handleInspectStateWorks(selectedState?.name)}
+              disabled={!selectedState}
             >
               Inspect State Works
             </button>
@@ -361,7 +349,7 @@ export function DashboardPage() {
           <div className="risk-gauge-container">
             <div className="gauge-circle">
               <div className="gauge-inner">
-                <div className="gauge-score">72</div>
+                <div className="gauge-score">{nationalRisk?.overall_score || 0}</div>
                 <div className="gauge-max">/ 100 RISK</div>
               </div>
             </div>
@@ -371,23 +359,23 @@ export function DashboardPage() {
               <div className="subbar-item">
                 <div className="subbar-header">
                   <span>Financial Deviation</span>
-                  <span style={{ fontWeight: 700 }}>81%</span>
+                  <span style={{ fontWeight: 700 }}>{nationalRisk?.financial_score || 0}%</span>
                 </div>
-                <div className="progress-bar-sm"><div className="progress-fill" style={{ width: '81%', background: 'var(--risk-critical)' }}></div></div>
+                <div className="progress-bar-sm"><div className="progress-fill" style={{ width: `${nationalRisk?.financial_score || 0}%`, background: 'var(--risk-critical)' }}></div></div>
               </div>
               <div className="subbar-item">
                 <div className="subbar-header">
                   <span>Execution Delay</span>
-                  <span style={{ fontWeight: 700 }}>67%</span>
+                  <span style={{ fontWeight: 700 }}>{nationalRisk?.delay_score || 0}%</span>
                 </div>
-                <div className="progress-bar-sm"><div className="progress-fill" style={{ width: '67%', background: 'var(--risk-high)' }}></div></div>
+                <div className="progress-bar-sm"><div className="progress-fill" style={{ width: `${nationalRisk?.delay_score || 0}%`, background: 'var(--risk-high)' }}></div></div>
               </div>
               <div className="subbar-item">
                 <div className="subbar-header">
                   <span>Duplicate Work Risk</span>
-                  <span style={{ fontWeight: 700 }}>76%</span>
+                  <span style={{ fontWeight: 700 }}>{nationalRisk?.duplicate_score || 0}%</span>
                 </div>
-                <div className="progress-bar-sm"><div className="progress-fill" style={{ width: '76%', background: 'var(--risk-high)' }}></div></div>
+                <div className="progress-bar-sm"><div className="progress-fill" style={{ width: `${nationalRisk?.duplicate_score || 0}%`, background: 'var(--risk-high)' }}></div></div>
               </div>
             </div>
           </div>

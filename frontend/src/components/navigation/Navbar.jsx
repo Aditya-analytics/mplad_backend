@@ -126,7 +126,6 @@ export function Navbar({ onToggleSidebar, onSelectWork, onOpenLogoutModal }) {
 
       <div className="header-actions">
         <span className="sih-badge"><i className="fa-solid fa-trophy"></i> SIH 2026</span>
-        <span className="demo-badge">DEMO DATA</span>
 
         {/* Notification Bell */}
         <div style={{ position: 'relative' }} ref={notifContainerRef}>

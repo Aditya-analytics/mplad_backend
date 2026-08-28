@@ -1,32 +1,33 @@
 import apiClient from './apiClient';
-import { environment } from '../config/environment';
-import { MOCK_ANALYTICS_DATA } from '../mocks/analytics';
 
 export const analyticsService = {
-  async getMonthlyExpenditure() {
-    if (environment.enableMockApi) {
-      await new Promise((resolve) => setTimeout(resolve, 250));
-      return MOCK_ANALYTICS_DATA.monthlyExpenditure;
+  async fetchMonthlyExpenditure() {
+    try {
+      const response = await apiClient.get('/analytics');
+      return response.data.monthlyExpenditure || [];
+    } catch (error) {
+      console.error('Error fetching monthly expenditure:', error);
+      return [];
     }
-    const response = await apiClient.get('/analytics/expenditure');
-    return response.data;
   },
 
-  async getCategoryBreakdown() {
-    if (environment.enableMockApi) {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return MOCK_ANALYTICS_DATA.categoryBreakdown;
+  async fetchStateExpenditure() {
+    try {
+      const response = await apiClient.get('/analytics');
+      return response.data.stateExpenditure || [];
+    } catch (error) {
+      console.error('Error fetching state expenditure:', error);
+      return [];
     }
-    const response = await apiClient.get('/analytics/categories');
-    return response.data;
   },
 
-  async getRiskTrends() {
-    if (environment.enableMockApi) {
-      await new Promise((resolve) => setTimeout(resolve, 250));
-      return MOCK_ANALYTICS_DATA.trendRisk;
+  async fetchTrendRisk() {
+    try {
+      const response = await apiClient.get('/analytics');
+      return response.data.trendRisk || [];
+    } catch (error) {
+      console.error('Error fetching trend risk:', error);
+      return [];
     }
-    const response = await apiClient.get('/analytics/trends');
-    return response.data;
-  },
+  }
 };

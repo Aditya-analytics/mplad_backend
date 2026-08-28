@@ -97,6 +97,38 @@ export function AnomaliesPage() {
         </div>
       </div>
 
+      {/* ENSEMBLE WEIGHTS EXPLANATION */}
+      <div className="dashboard-card" style={{ marginBottom: '1.75rem', background: 'var(--navy-primary)', color: '#ffffff' }}>
+        <h3 className="section-title" style={{ color: '#ffffff', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.8rem' }}>
+          <i className="fa-solid fa-scale-balanced" style={{ color: 'var(--saffron)' }}></i> AI Ensemble Risk Scoring Logic (0-100)
+        </h3>
+        <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', marginBottom: '1.2rem' }}>
+          The final Project Risk Score is dynamically calculated using a weighted ensemble of four independent Machine Learning & Rule-based models. Projects starting at a base score of 5 escalate based on compounded risk factors:
+        </p>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: '200px', background: 'rgba(255,255,255,0.06)', padding: '1.2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--saffron)' }}>+40 Pts</div>
+            <div style={{ fontWeight: 700, marginTop: '0.4rem', color: '#ffffff' }}>Duplicate Detection (NLP)</div>
+            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.4rem', lineHeight: 1.4 }}>TF-IDF Cosine Similarity > 85% match with historically sanctioned works in the same constituency.</div>
+          </div>
+          <div style={{ flex: 1, minWidth: '200px', background: 'rgba(255,255,255,0.06)', padding: '1.2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fca5a5' }}>+30 Pts</div>
+            <div style={{ fontWeight: 700, marginTop: '0.4rem', color: '#ffffff' }}>Cost Anomaly (Isolation Forest)</div>
+            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.4rem', lineHeight: 1.4 }}>Significant statistical deviation (-1) from historical category baselines within the state.</div>
+          </div>
+          <div style={{ flex: 1, minWidth: '200px', background: 'rgba(255,255,255,0.06)', padding: '1.2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fde047' }}>+20 Pts</div>
+            <div style={{ fontWeight: 700, marginTop: '0.4rem', color: '#ffffff' }}>Delay Risk (Random Forest)</div>
+            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.4rem', lineHeight: 1.4 }}>Predictive tree analysis indicates a high probability of severe schedule overrun (>90 days).</div>
+          </div>
+          <div style={{ flex: 1, minWidth: '200px', background: 'rgba(255,255,255,0.06)', padding: '1.2rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#93c5fd' }}>+10 Pts</div>
+            <div style={{ fontWeight: 700, marginTop: '0.4rem', color: '#ffffff' }}>Compliance Violation</div>
+            <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.6)', marginTop: '0.4rem', lineHeight: 1.4 }}>Rule-based trigger (e.g., 100% funds disbursed but physical asset marked incomplete).</div>
+          </div>
+        </div>
+      </div>
+
       {/* FRAUD & ANOMALY RADAR */}
       <div className="dashboard-card">
         <div className="section-header">

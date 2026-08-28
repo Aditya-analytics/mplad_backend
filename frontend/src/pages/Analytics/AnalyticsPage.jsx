@@ -1,28 +1,45 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { analyticsService } from '../../services/analyticsService';
 
 export function AnalyticsPage() {
   const [timePeriod, setTimePeriod] = useState('30');
+  const [analyticsData, setAnalyticsData] = useState(null);
 
   const fundCanvasRef = useRef(null);
   const monthCanvasRef = useRef(null);
   const trendCanvasRef = useRef(null);
 
   const trendChartInstanceRef = useRef(null);
+  const fundChartInstanceRef = useRef(null);
+  const monthChartInstanceRef = useRef(null);
 
   useEffect(() => {
-    if (typeof window.Chart === 'undefined') return;
+    async function loadData() {
+      const [monthly, statesData, trends] = await Promise.all([
+        analyticsService.fetchMonthlyExpenditure(),
+        analyticsService.fetchStateExpenditure(),
+        analyticsService.fetchTrendRisk()
+      ]);
+      setAnalyticsData({ monthly, states: statesData, trends });
+    }
+    loadData();
+  }, []);
 
-    // Fund Comparison Chart
-    let fundChart;
+  useEffect(() => {
+    if (!analyticsData || typeof window.Chart === 'undefined') return;
+
+    // State Expenditure Breakdown Chart (Sanctioned vs Utilized)
+    if (fundChartInstanceRef.current) fundChartInstanceRef.current.destroy();
     if (fundCanvasRef.current) {
       const ctx = fundCanvasRef.current.getContext('2d');
-      fundChart = new window.Chart(ctx, {
+      const states = analyticsData.states || [];
+      fundChartInstanceRef.current = new window.Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ['MH', 'UP', 'KA', 'RJ', 'TN', 'WB', 'GJ'],
+          labels: states.map(s => s.state.length > 15 ? s.state.substring(0, 15) + '...' : s.state),
           datasets: [
-            { label: 'Sanctioned (Cr)', data: [640, 980, 510, 450, 580, 610, 440], backgroundColor: '#0A192F' },
-            { label: 'Utilized (Cr)', data: [527, 745, 432, 401, 513, 484, 381], backgroundColor: '#138808' }
+            { label: 'Sanctioned (Cr)', data: states.map(s => s.sanctioned / 10000000), backgroundColor: '#0A192F' },
+            { label: 'Utilized (Cr)', data: states.map(s => s.utilized / 10000000), backgroundColor: '#138808' }
           ]
         },
         options: {
@@ -33,17 +50,18 @@ export function AnalyticsPage() {
       });
     }
 
-    // Monthly Velocity Chart
-    let monthChart;
+    // Monthly Expenditure Chart (formerly Velocity)
+    if (monthChartInstanceRef.current) monthChartInstanceRef.current.destroy();
     if (monthCanvasRef.current) {
       const ctx = monthCanvasRef.current.getContext('2d');
-      monthChart = new window.Chart(ctx, {
+      const months = analyticsData.monthly || [];
+      monthChartInstanceRef.current = new window.Chart(ctx, {
         type: 'line',
         data: {
-          labels: ['Q1 2025', 'Q2 2025', 'Q3 2025', 'Q4 2025', 'Q1 2026', 'Q2 2026'],
+          labels: months.map(m => m.month),
           datasets: [{
-            label: 'Disbursement (Cr ₹)',
-            data: [1120, 1450, 1890, 2400, 3100, 3917],
+            label: 'Sanctioned (Cr ₹)',
+            data: months.map(m => m.sanctioned),
             borderColor: '#FF9933',
             backgroundColor: 'rgba(255, 153, 51, 0.1)',
             fill: true,
@@ -59,36 +77,24 @@ export function AnalyticsPage() {
     }
 
     return () => {
-      if (fundChart) fundChart.destroy();
-      if (monthChart) monthChart.destroy();
+      if (fundChartInstanceRef.current) fundChartInstanceRef.current.destroy();
+      if (monthChartInstanceRef.current) monthChartInstanceRef.current.destroy();
     };
-  }, []);
+  }, [analyticsData]);
 
-  // Trend Chart with dynamic time period
+  // Trend Chart
   useEffect(() => {
-    if (!trendCanvasRef.current || typeof window.Chart === 'undefined') return;
+    if (!analyticsData || !trendCanvasRef.current || typeof window.Chart === 'undefined') return;
 
     if (trendChartInstanceRef.current) {
       trendChartInstanceRef.current.destroy();
     }
 
-    let labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
-    let anomalyData = [12.4, 14.1, 11.8, 16.5, 18.2, 15.0, 19.8, 22.1];
-    let delayData = [24.1, 26.5, 23.8, 28.0, 31.2, 29.5, 33.0, 35.4];
-
-    if (timePeriod === '90') {
-      labels = ['Jun W1', 'Jun W2', 'Jun W3', 'Jun W4', 'Jul W1', 'Jul W2', 'Jul W3', 'Jul W4', 'Aug W1', 'Aug W2', 'Aug W3', 'Aug W4'];
-      anomalyData = [15.1, 14.8, 16.2, 15.9, 18.1, 17.5, 19.2, 18.8, 20.4, 21.1, 21.8, 22.1];
-      delayData = [28.2, 29.0, 29.8, 30.5, 31.0, 32.1, 33.4, 33.9, 34.2, 34.8, 35.1, 35.4];
-    } else if (timePeriod === '180') {
-      labels = ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
-      anomalyData = [11.8, 16.5, 18.2, 15.0, 19.8, 22.1];
-      delayData = [23.8, 28.0, 31.2, 29.5, 33.0, 35.4];
-    } else if (timePeriod === '365') {
-      labels = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
-      anomalyData = [9.4, 10.2, 11.0, 10.8, 12.4, 14.1, 11.8, 16.5, 18.2, 15.0, 19.8, 22.1];
-      delayData = [18.2, 19.5, 20.4, 22.1, 24.1, 26.5, 23.8, 28.0, 31.2, 29.5, 33.0, 35.4];
-    }
+    const trends = analyticsData.trends || [];
+    // Currently ignores timePeriod dropdown and shows backend data
+    let labels = trends.map(t => t.label);
+    let anomalyData = trends.map(t => t.anomalyRate);
+    let delayData = trends.map(t => t.delayRate);
 
     const ctx = trendCanvasRef.current.getContext('2d');
     trendChartInstanceRef.current = new window.Chart(ctx, {
@@ -100,33 +106,44 @@ export function AnalyticsPage() {
             label: 'AI Flagged Anomaly Rate (%)',
             data: anomalyData,
             borderColor: '#DC2626',
-            backgroundColor: 'rgba(220, 38, 38, 0.1)',
-            fill: true,
-            tension: 0.3,
+            backgroundColor: 'transparent',
+            tension: 0.4,
+            borderWidth: 2
           },
           {
-            label: 'Schedule Delay Rate (%)',
+            label: 'Project Delay Rate (%)',
             data: delayData,
-            borderColor: '#D97706',
-            backgroundColor: 'rgba(217, 119, 6, 0.05)',
-            fill: false,
-            tension: 0.3,
+            borderColor: '#F59E0B',
+            backgroundColor: 'transparent',
+            tension: 0.4,
+            borderWidth: 2,
+            borderDash: [5, 5]
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { position: 'top' } }
+        plugins: {
+          legend: { position: 'top' },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Risk Percentage (%)' }
+          }
+        }
       }
     });
 
     return () => {
-      if (trendChartInstanceRef.current) {
-        trendChartInstanceRef.current.destroy();
-      }
+      if (trendChartInstanceRef.current) trendChartInstanceRef.current.destroy();
     };
-  }, [timePeriod]);
+  }, [timePeriod, analyticsData]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>

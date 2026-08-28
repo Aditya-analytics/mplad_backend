@@ -46,7 +46,7 @@ This is how the AI models will specifically tackle the requirements:
 | **Detecting Financial Anomalies** | Isolation Forests / Autoencoders | Identifies statistical outliers in fund allocation. *Example: A standard bus shelter costs ₹2 Lakhs, but a new proposal asks for ₹8 Lakhs.* |
 | **Spotting Duplicate Works** | NLP (BERT Embeddings / TF-IDF) | Compares text of new proposals against past projects. *Example: "Construction of Road in Village X" matches "Laying of CC Road in X Village."* |
 | **Predicting Project Delays** | XGBoost / Random Forest | Analyzes past completion times of specific contractors and project types to assign a "Delay Risk Score" to ongoing works. |
-| **Asset Verification** | Computer Vision (CNNs) & Geo-fencing | Analyzes uploaded completion photos to verify if an asset (e.g., a water tank) actually exists and matches the provided GPS coordinates. |
+
 
 ---
 

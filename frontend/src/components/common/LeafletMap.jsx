@@ -10,7 +10,7 @@ const DEFAULT_LOCATIONS = [
   { name: 'Gujarat (Ahmedabad)', lat: 23.0225, lng: 72.5714, risk: 'MODERATE', score: 62, works: 1680, utilization: 86.7, delay: 52 },
 ];
 
-export function LeafletMap({ height = '420px', showControls = true, onSelectLocation }) {
+export function LeafletMap({ height = '420px', showControls = true, onSelectLocation, locations = [] }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const layerGroupRef = useRef(null);
@@ -39,26 +39,43 @@ export function LeafletMap({ height = '420px', showControls = true, onSelectLoca
     const layerGroup = layerGroupRef.current;
     layerGroup.clearLayers();
 
-    DEFAULT_LOCATIONS.forEach((loc) => {
+    const dataToRender = locations.length > 0 ? locations : DEFAULT_LOCATIONS;
+
+    dataToRender.forEach((loc) => {
       let markerColor = '#10B981';
       let radius = 9;
-      let metricText = `Risk Score: <b>${loc.score}/100</b>`;
+      
+      // Fallback variables if using old mock format vs new real format
+      const lat = loc.coordinates ? loc.coordinates[1] : loc.lat;
+      const lng = loc.coordinates ? loc.coordinates[0] : loc.lng;
+      const score = loc.riskScore || loc.score || 0;
+      let riskStr = loc.risk || 'MODERATE';
+      if (!loc.risk && score > 75) riskStr = 'CRITICAL';
+      else if (!loc.risk && score > 50) riskStr = 'HIGH';
+      else if (!loc.risk && score > 25) riskStr = 'MODERATE';
+      else if (!loc.risk) riskStr = 'LOW';
+      
+      const worksCount = loc.works !== undefined ? loc.works : 0;
+      const util = loc.utilization !== undefined ? loc.utilization : 80;
+      const delays = loc.delayed !== undefined ? loc.delayed : (loc.delay || 0);
+
+      let metricText = `Risk Score: <b>${score}/100</b>`;
 
       if (activeLayer === 'risk') {
-        markerColor = loc.risk === 'CRITICAL' ? '#DC2626' : loc.risk === 'HIGH' ? '#EA580C' : loc.risk === 'MODERATE' ? '#D97706' : '#10B981';
-        radius = loc.risk === 'CRITICAL' ? 12 : 9;
-        metricText = `Risk Level: <b>${loc.risk} (${loc.score}/100)</b>`;
+        markerColor = riskStr === 'CRITICAL' ? '#DC2626' : riskStr === 'HIGH' ? '#EA580C' : riskStr === 'MODERATE' ? '#D97706' : '#10B981';
+        radius = riskStr === 'CRITICAL' ? 12 : 9;
+        metricText = `Risk Level: <b>${riskStr} (${score}/100)</b>`;
       } else if (activeLayer === 'utilization') {
-        markerColor = loc.utilization > 85 ? '#138808' : loc.utilization > 80 ? '#3B82F6' : '#DC2626';
+        markerColor = util > 85 ? '#138808' : util > 80 ? '#3B82F6' : '#DC2626';
         radius = 10;
-        metricText = `Fund Utilization: <b>${loc.utilization}%</b>`;
+        metricText = `Fund Utilization: <b>${util}%</b>`;
       } else if (activeLayer === 'delays') {
-        markerColor = loc.delay > 100 ? '#DC2626' : loc.delay > 50 ? '#EA580C' : '#10B981';
-        radius = loc.delay > 100 ? 12 : 8;
-        metricText = `Delayed Works: <b>${loc.delay} projects</b>`;
+        markerColor = delays > 100 ? '#DC2626' : delays > 50 ? '#EA580C' : '#10B981';
+        radius = delays > 100 ? 12 : 8;
+        metricText = `Delayed Works: <b>${delays} projects</b>`;
       }
 
-      const circle = L.circleMarker([loc.lat, loc.lng], {
+      const circle = L.circleMarker([lat, lng], {
         color: markerColor,
         fillColor: markerColor,
         fillOpacity: 0.75,
