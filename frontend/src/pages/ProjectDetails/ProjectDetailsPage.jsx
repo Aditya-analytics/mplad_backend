@@ -4,6 +4,7 @@ import { projectService } from '../../services/projectService';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { formatDate } from '../../utils/formatDate';
 import { ROUTES } from '../../constants/routes';
+import { CitizenFeedbackSection } from '../../components/common/CitizenFeedbackSection';
 
 export function ProjectDetailsPage() {
   const { projectId } = useParams();
@@ -232,6 +233,53 @@ export function ProjectDetailsPage() {
             </div>
           </div>
         )}
+
+        {/* CITIZEN INTELLIGENCE BLOCK */}
+        <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '1.2rem', marginTop: '1.2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <h3 style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--navy-primary)', margin: 0 }}>
+              <i className="fa-solid fa-users-viewfinder" style={{ marginRight: '0.4rem', color: 'var(--saffron)' }}></i>
+              Citizen Intelligence
+            </h3>
+            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#D97706', background: 'var(--saffron-light)', padding: '2px 8px', borderRadius: 4 }}>
+              Combined Indicator: Elevated Attention
+            </span>
+          </div>
+
+          <div className="modal-grid-2" style={{ marginBottom: '1rem' }}>
+            <div className="info-block">
+              <div className="info-block-label">Citizen Rating</div>
+              <div className="info-block-val" style={{ color: '#D97706' }}>⭐ 4.1 / 5</div>
+            </div>
+            <div className="info-block">
+              <div className="info-block-label">Verified Ratings</div>
+              <div className="info-block-val">384</div>
+            </div>
+            <div className="info-block">
+              <div className="info-block-label">Citizen Comments</div>
+              <div className="info-block-val">126</div>
+            </div>
+            <div className="info-block">
+              <div className="info-block-label">Open Complaints</div>
+              <div className="info-block-val" style={{ color: 'var(--risk-critical)' }}>7</div>
+            </div>
+            <div className="info-block">
+              <div className="info-block-label">Evidence Submissions</div>
+              <div className="info-block-val">14 Photos / Videos</div>
+            </div>
+            <div className="info-block">
+              <div className="info-block-label">Citizen Sentiment</div>
+              <div className="info-block-val" style={{ color: '#2563EB' }}>Moderately Positive</div>
+            </div>
+          </div>
+
+          <div style={{ padding: '0.75rem', background: '#F8FAFC', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            <strong>Combined Risk Intelligence:</strong> Official AI project risk (<strong>68 / 100 — HIGH</strong>) combined with ground citizen anomaly signals (<strong>82 / 100 — HIGH</strong>) flags this work for administrative inspection.
+          </div>
+        </div>
+
+        {/* CITIZEN FEEDBACK & SUBMISSION CONTROLS */}
+        <CitizenFeedbackSection work={project} />
       </div>
     </div>
   );

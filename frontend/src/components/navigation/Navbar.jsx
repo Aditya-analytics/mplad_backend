@@ -1,20 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProjects } from '../../hooks/useProjects';
+import { useAuth } from '../../hooks/useAuth';
+import { citizenService } from '../../services/citizenService';
 import { ROUTES } from '../../constants/routes';
 
 export function Navbar({ onToggleSidebar, onSelectWork, onOpenLogoutModal }) {
   const navigate = useNavigate();
   const { projects } = useProjects();
+  const { user, role } = useAuth();
   const [searchValue, setSearchValue] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [showAdminDropdown, setShowAdminDropdown] = useState(false);
+  const [citizenNotifs, setCitizenNotifs] = useState([]);
 
   const searchContainerRef = useRef(null);
   const notifContainerRef = useRef(null);
   const adminContainerRef = useRef(null);
+
+  useEffect(() => {
+    setCitizenNotifs(citizenService.getAdminNotifications());
+  }, [showNotifDropdown]);
 
   useEffect(() => {
     if (!searchValue.trim()) {
@@ -153,6 +161,26 @@ export function Navbar({ onToggleSidebar, onSelectWork, onOpenLogoutModal }) {
                 Mark all read
               </span>
             </div>
+
+            {/* Citizen Submissions Notifications for Admin */}
+            {role !== 'CITIZEN' && citizenNotifs.map((notif) => (
+              <div
+                key={notif.id}
+                className="dropdown-item"
+                style={{ background: '#FFFBEB', borderLeft: '3px solid var(--saffron)' }}
+                onClick={() => {
+                  setShowNotifDropdown(false);
+                  navigate(ROUTES.CITIZEN_INTELLIGENCE);
+                }}
+              >
+                <i className="fa-solid fa-bullhorn" style={{ color: 'var(--saffron)' }}></i>
+                <div>
+                  <div style={{ fontWeight: 700, color: 'var(--navy-primary)' }}>{notif.title}</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{notif.message}</div>
+                </div>
+              </div>
+            ))}
+
             <div className="dropdown-item" onClick={() => { setShowNotifDropdown(false); navigate(ROUTES.ALERTS); }}>
               <i className="fa-solid fa-triangle-exclamation" style={{ color: 'var(--risk-critical)' }}></i>
               <div>
@@ -177,7 +205,7 @@ export function Navbar({ onToggleSidebar, onSelectWork, onOpenLogoutModal }) {
           </div>
         </div>
 
-        {/* Admin Profile */}
+        {/* User Profile */}
         <div style={{ position: 'relative' }} ref={adminContainerRef}>
           <div
             className="admin-profile"
@@ -188,10 +216,16 @@ export function Navbar({ onToggleSidebar, onSelectWork, onOpenLogoutModal }) {
               setShowNotifDropdown(false);
             }}
           >
-            <div className="admin-avatar">HP</div>
+            <div className="admin-avatar">
+              {user?.avatar || (user?.name || user?.fullName || 'HP').substring(0, 2).toUpperCase()}
+            </div>
             <div className="admin-info">
-              <span className="admin-name">H. Pandey</span>
-              <span className="admin-role">Chief Administrator</span>
+              <span className="admin-name">
+                {user?.fullName || user?.name || 'H. Pandey'}
+              </span>
+              <span className="admin-role">
+                {role === 'CITIZEN' ? (user?.isVerified ? 'Verified Citizen' : 'Citizen Contributor') : (user?.designation || 'Chief Administrator')}
+              </span>
             </div>
             <i className="fa-solid fa-chevron-down" style={{ fontSize: '0.7rem', color: '#94A3B8', marginLeft: '0.2rem' }}></i>
           </div>

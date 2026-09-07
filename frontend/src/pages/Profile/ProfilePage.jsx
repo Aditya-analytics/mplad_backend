@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 
 export function ProfilePage() {
@@ -73,6 +73,50 @@ export function ProfilePage() {
               <span className="stat-label">Audit Session ID:</span>
               <span className="stat-value" style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>MPLAD-AUTH-2026-X99</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ADMINISTRATOR IDENTITY VERIFICATION */}
+      <section className="view-section active">
+        <div className="section-header">
+          <h2 className="section-title">
+            <i className="fa-solid fa-id-card"></i> Administrator Identity Verification
+          </h2>
+        </div>
+        <div className="dashboard-card" style={{ maxWidth: '650px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', padding: '0.75rem 1rem', background: '#D1FAE5', borderRadius: 'var(--radius-sm)', border: '1px solid #A7F3D0' }}>
+            <i className="fa-solid fa-shield-check" style={{ color: '#059669', fontSize: '1.1rem' }}></i>
+            <div>
+              <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#065F46' }}>Identity Verified — Government Staff</div>
+              <div style={{ fontSize: '0.72rem', color: '#047857', marginTop: '2px' }}>Verified via MoSPI Human Resource Management System (HRMS)</div>
+            </div>
+          </div>
+
+          <div className="stat-list">
+            <div className="stat-item">
+              <span className="stat-label">Government Employee ID:</span>
+              <span className="stat-value" style={{ fontFamily: 'monospace', fontSize: '0.82rem' }}>MOSPI-EMP-2026-04</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">National ID (Masked):</span>
+              <span className="stat-value" style={{ fontFamily: 'monospace', fontSize: '0.82rem', letterSpacing: '2px' }}>XXXX-XXXX-9012</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Verification Authority:</span>
+              <span className="stat-value">UIDAI / MoSPI HRMS</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">Last Verified:</span>
+              <span className="stat-value">2026-04-01 (Annual Renewal)</span>
+            </div>
+          </div>
+
+          <div style={{ marginTop: '1rem', padding: '0.65rem 0.85rem', background: '#FEF3C7', borderRadius: 'var(--radius-sm)', fontSize: '0.75rem', color: '#92400E', display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+            <i className="fa-solid fa-circle-info" style={{ marginTop: '1px', flexShrink: 0 }}></i>
+            <span>
+              <strong>Prototype Disclaimer:</strong> In the live production deployment, administrator identity is validated through the UIDAI eAuth API and MoSPI HRMS. The full Aadhaar number is never stored or displayed by this system. Only a masked identifier is shown post-verification.
+            </span>
           </div>
         </div>
       </section>

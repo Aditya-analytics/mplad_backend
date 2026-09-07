@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { formatCurrency } from '../../utils/formatCurrency';
+import { CitizenFeedbackSection } from './CitizenFeedbackSection';
+import { ShowCauseNoticeModal } from './ShowCauseNoticeModal';
 
 export function WorkDetailModal({ work, isOpen, onClose }) {
-  if (!isOpen || !work) return null;
+  const [showNoticeModal, setShowNoticeModal] = useState(false);
 
-  const handleIssueNotice = () => {
-    alert(`Audit Notice successfully dispatched to District Collector (${work.district || 'District Administration'}).`);
-  };
+  if (!isOpen || !work) return null;
 
   const sanctionedText = typeof work.sanctionedAmount === 'number' 
     ? formatCurrency(work.sanctionedAmount) 
@@ -85,15 +85,26 @@ export function WorkDetailModal({ work, isOpen, onClose }) {
               {reasoning}
             </p>
           </div>
+
+          <CitizenFeedbackSection work={work} onCloseParentModal={onClose} />
         </div>
         <div className="modal-footer">
           <button className="btn-secondary" onClick={onClose}>Close</button>
-          <button className="btn-primary" onClick={handleIssueNotice}>
+          <button className="btn-primary" onClick={() => setShowNoticeModal(true)}>
             <i className="fa-solid fa-paper-plane" style={{ marginRight: '0.3rem' }}></i>
             Issue Collector Audit Notice
           </button>
         </div>
       </div>
+
+      {showNoticeModal && (
+        <ShowCauseNoticeModal
+          isOpen={showNoticeModal}
+          onClose={() => setShowNoticeModal(false)}
+          targetCitizen={null}
+          targetProject={work}
+        />
+      )}
     </div>
   );
 }

@@ -20,18 +20,45 @@ import { AnalyticsPage } from '../pages/Analytics/AnalyticsPage';
 import { AlertsPage } from '../pages/Alerts/AlertsPage';
 import { ReportsPage } from '../pages/Reports/ReportsPage';
 import { ProfilePage } from '../pages/Profile/ProfilePage';
+import { CitizenParticipationPage } from '../pages/Citizen/CitizenParticipationPage';
+import { CitizenIntelligencePage } from '../pages/Admin/CitizenIntelligencePage';
 import { NotFoundPage } from '../pages/NotFound/NotFoundPage';
+import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 import { ROUTES } from '../constants/routes';
+
+function AdminOnly({ children }) {
+  const { role } = useAuth();
+  const navigate = useNavigate();
+
+  if (role === 'CITIZEN') {
+    return (
+      <div className="dashboard-card" style={{ padding: '3rem 1.5rem', textAlign: 'center', maxWidth: '520px', margin: '3rem auto' }}>
+        <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--saffron-light)', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', margin: '0 auto 1rem' }}>
+          <i className="fa-solid fa-lock"></i>
+        </div>
+        <h2 style={{ fontFamily: "'Outfit', sans-serif", fontSize: '1.3rem', fontWeight: 800, color: 'var(--navy-primary)' }}>
+          Access Restricted
+        </h2>
+        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.4rem', marginBottom: '1.5rem' }}>
+          You do not have permission to access this section.
+        </p>
+        <button className="btn-primary" onClick={() => navigate(ROUTES.DASHBOARD)}>
+          Return to Dashboard
+        </button>
+      </div>
+    );
+  }
+  return children;
+}
 
 export function AppRoutes() {
   return (
     <Routes>
-      {/* Public Routes */}
-      <Route element={<PublicLayout />}>
-        <Route index element={<LandingPage />} />
-        <Route path={ROUTES.LANDING} element={<LandingPage />} />
-      </Route>
+      {/* Entry Route: index.html entry goes directly to Platform Login */}
+      <Route path="/" element={<Navigate to={ROUTES.LOGIN} replace />} />
+      <Route path="/landing" element={<Navigate to={ROUTES.LOGIN} replace />} />
 
       {/* Auth Layout */}
       <Route element={<AuthLayout />}>
@@ -41,18 +68,23 @@ export function AppRoutes() {
       {/* Protected Dashboard Routes */}
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
+          {/* Publicly viewable by both Citizens & Admins */}
           <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
           <Route path={ROUTES.PROJECTS} element={<ProjectsPage />} />
           <Route path={ROUTES.PROJECT_DETAILS} element={<ProjectDetailsPage />} />
-          <Route path={ROUTES.ANOMALIES_DUPLICATES} element={<DuplicatesPage />} />
-          <Route path={ROUTES.ANOMALIES_COSTS} element={<CostsPage />} />
-          <Route path={ROUTES.ANOMALIES_DELAYS} element={<DelaysPage />} />
-          <Route path={ROUTES.ANOMALIES_COMPLIANCE} element={<CompliancePage />} />
-          <Route path={ROUTES.ANOMALY_DETAILS} element={<AnomalyDetailsPage />} />
-          <Route path={ROUTES.ANALYTICS} element={<AnalyticsPage />} />
-          <Route path={ROUTES.ALERTS} element={<AlertsPage />} />
-          <Route path={ROUTES.REPORTS} element={<ReportsPage />} />
-          <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
+          <Route path={ROUTES.CITIZEN_PARTICIPATION} element={<CitizenParticipationPage />} />
+
+          {/* Admin-only routes */}
+          <Route path={ROUTES.ANOMALIES_DUPLICATES} element={<AdminOnly><DuplicatesPage /></AdminOnly>} />
+          <Route path={ROUTES.ANOMALIES_COSTS} element={<AdminOnly><CostsPage /></AdminOnly>} />
+          <Route path={ROUTES.ANOMALIES_DELAYS} element={<AdminOnly><DelaysPage /></AdminOnly>} />
+          <Route path={ROUTES.ANOMALIES_COMPLIANCE} element={<AdminOnly><CompliancePage /></AdminOnly>} />
+          <Route path={ROUTES.ANOMALY_DETAILS} element={<AdminOnly><AnomalyDetailsPage /></AdminOnly>} />
+          <Route path={ROUTES.ANALYTICS} element={<AdminOnly><AnalyticsPage /></AdminOnly>} />
+          <Route path={ROUTES.ALERTS} element={<AdminOnly><AlertsPage /></AdminOnly>} />
+          <Route path={ROUTES.REPORTS} element={<AdminOnly><ReportsPage /></AdminOnly>} />
+          <Route path={ROUTES.PROFILE} element={<AdminOnly><ProfilePage /></AdminOnly>} />
+          <Route path={ROUTES.CITIZEN_INTELLIGENCE} element={<AdminOnly><CitizenIntelligencePage /></AdminOnly>} />
         </Route>
       </Route>
 
@@ -61,3 +93,4 @@ export function AppRoutes() {
     </Routes>
   );
 }
+

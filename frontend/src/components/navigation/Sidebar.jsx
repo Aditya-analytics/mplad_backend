@@ -1,37 +1,62 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import { ROUTES } from '../../constants/routes';
 
 export function Sidebar({ onToggleCollapse, onCloseMobile }) {
   const location = useLocation();
+  const { role, isVerified } = useAuth();
+  const isCitizen = role === 'CITIZEN';
 
-  const navSections = [
-    {
-      category: 'Main Dashboard',
-      items: [
-        { label: 'Overview', path: ROUTES.DASHBOARD, icon: 'fa-chart-pie' },
-        { label: 'Works Monitoring', path: ROUTES.PROJECTS, icon: 'fa-list-check' },
-      ],
-    },
-    {
-      category: 'Intelligence & Analytics',
-      items: [
-        { label: 'Duplicate Radar (NLP)', path: ROUTES.ANOMALIES_DUPLICATES, icon: 'fa-copy', badge: 'HIGH' },
-        { label: 'Cost Outliers (ML)', path: ROUTES.ANOMALIES_COSTS, icon: 'fa-money-bill-wave' },
-        { label: 'Delay Predictor', path: ROUTES.ANOMALIES_DELAYS, icon: 'fa-clock-rotate-left' },
-        { label: 'Compliance Audit', path: ROUTES.ANOMALIES_COMPLIANCE, icon: 'fa-scale-balanced', badge: 'CRITICAL' },
-        { label: 'Financial Analytics', path: ROUTES.ANALYTICS, icon: 'fa-chart-line' },
-        { label: 'Alert Center', path: ROUTES.ALERTS, icon: 'fa-bell', badge: '3' },
-      ],
-    },
-    {
-      category: 'Governance',
-      items: [
-        { label: 'Report Generator', path: ROUTES.REPORTS, icon: 'fa-file-invoice' },
-        { label: 'Settings & Profile', path: ROUTES.PROFILE, icon: 'fa-user-shield' },
-      ],
-    },
-  ];
+  const navSections = isCitizen
+    ? [
+        {
+          category: 'Public Dashboard',
+          items: [
+            { label: 'Overview', path: ROUTES.DASHBOARD, icon: 'fa-chart-pie' },
+            { label: 'Works Monitoring', path: ROUTES.PROJECTS, icon: 'fa-list-check' },
+          ],
+        },
+        {
+          category: 'Citizen Portal',
+          items: [
+            {
+              label: 'Citizen Participation',
+              path: ROUTES.CITIZEN_PARTICIPATION,
+              icon: 'fa-users',
+              badge: isVerified ? 'VERIFIED' : 'ACTION',
+            },
+          ],
+        },
+      ]
+    : [
+        {
+          category: 'Main Dashboard',
+          items: [
+            { label: 'Overview', path: ROUTES.DASHBOARD, icon: 'fa-chart-pie' },
+            { label: 'Works Monitoring', path: ROUTES.PROJECTS, icon: 'fa-list-check' },
+          ],
+        },
+        {
+          category: 'Intelligence & Analytics',
+          items: [
+            { label: 'Duplicate Radar (NLP)', path: ROUTES.ANOMALIES_DUPLICATES, icon: 'fa-copy', badge: 'HIGH' },
+            { label: 'Cost Outliers (ML)', path: ROUTES.ANOMALIES_COSTS, icon: 'fa-money-bill-wave' },
+            { label: 'Delay Predictor', path: ROUTES.ANOMALIES_DELAYS, icon: 'fa-clock-rotate-left' },
+            { label: 'Compliance Audit', path: ROUTES.ANOMALIES_COMPLIANCE, icon: 'fa-scale-balanced', badge: 'CRITICAL' },
+            { label: 'Financial Analytics', path: ROUTES.ANALYTICS, icon: 'fa-chart-line' },
+            { label: 'Alert Center', path: ROUTES.ALERTS, icon: 'fa-bell', badge: '3' },
+            { label: 'Citizen Intelligence', path: ROUTES.CITIZEN_INTELLIGENCE, icon: 'fa-users-viewfinder', badge: 'NEW' },
+          ],
+        },
+        {
+          category: 'Governance',
+          items: [
+            { label: 'Report Generator', path: ROUTES.REPORTS, icon: 'fa-file-invoice' },
+            { label: 'Settings & Profile', path: ROUTES.PROFILE, icon: 'fa-user-shield' },
+          ],
+        },
+      ];
 
   return (
     <aside className="sidebar">
@@ -83,3 +108,4 @@ export function Sidebar({ onToggleCollapse, onCloseMobile }) {
 }
 
 export default Sidebar;
+

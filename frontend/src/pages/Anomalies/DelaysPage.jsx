@@ -55,7 +55,7 @@ export function DelaysPage() {
           <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--navy-primary)' }}>{kpis.total}</div>
         </div>
         <div className="dashboard-card" style={{ borderLeft: '4px solid #D97706' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Critical Overruns (>75% Prob)</div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>Critical Overruns (&gt;75% Prob)</div>
           <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#D97706' }}>{kpis.critical}</div>
         </div>
         <div className="dashboard-card" style={{ borderLeft: '4px solid var(--navy-primary)' }}>

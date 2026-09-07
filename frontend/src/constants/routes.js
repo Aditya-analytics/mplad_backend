@@ -13,4 +13,7 @@ export const ROUTES = {
   ALERTS: '/app/alerts',
   REPORTS: '/app/reports',
   PROFILE: '/app/profile',
+  CITIZEN_PARTICIPATION: '/app/citizen-participation',
+  CITIZEN_INTELLIGENCE: '/app/citizen-intelligence',
 };
+
