@@ -27,6 +27,7 @@ export function useDashboard() {
         setGeospatialData(geo);
         setNationalRisk(national);
       } catch (err) {
+        console.error("Dashboard Load Error:", err);
         setError(err.message || 'Failed to load dashboard statistics');
       } finally {
         setLoading(false);

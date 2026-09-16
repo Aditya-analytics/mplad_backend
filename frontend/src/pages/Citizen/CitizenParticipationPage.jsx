@@ -32,8 +32,8 @@ export function CitizenParticipationPage() {
 
   const citizenEmail = user?.email || 'citizen@demo.in';
 
-  const loadSubmissions = () => {
-    const list = citizenService.getCitizenSubmissions(citizenEmail);
+  const loadSubmissions = async () => {
+    const list = await citizenService.getCitizenSubmissions(citizenEmail);
     setSubmissions(list);
   };
 
@@ -93,10 +93,10 @@ export function CitizenParticipationPage() {
   };
 
   // Delete comment handler
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
     try {
-      citizenService.deleteComment(deleteTarget.id, citizenEmail);
+      await citizenService.deleteComment(deleteTarget.id, citizenEmail);
       setActionNotice('Comment deleted successfully.');
       loadSubmissions();
     } catch (err) {

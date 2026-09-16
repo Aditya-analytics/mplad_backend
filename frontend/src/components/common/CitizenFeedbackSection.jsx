@@ -72,9 +72,9 @@ export function CitizenFeedbackSection({ work, onCloseParentModal }) {
     setAttachedFiles(attachedFiles.filter((_, i) => i !== index));
   };
 
-  const handleSubmitRating = (e) => {
+  const handleSubmitRating = async (e) => {
     e.preventDefault();
-    citizenService.addSubmission({
+    await citizenService.addSubmission({
       id: `SUB-${Date.now()}`,
       referenceId: `MPL-CIT-2026-${Math.floor(100000 + Math.random() * 900000)}`,
       type: 'RATING',

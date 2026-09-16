@@ -16,18 +16,19 @@ export function CitizenIntelligencePage() {
   const [districtFilter, setDistrictFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const loadData = () => {
-    setSubmissions(citizenService.getSubmissions());
+  const loadData = async () => {
+    const subs = await citizenService.getSubmissions();
+    setSubmissions(subs || []);
   };
 
   useEffect(() => {
     loadData();
   }, []);
 
-  const handleAction = (status, defaultNote) => {
+  const handleAction = async (status, defaultNote) => {
     if (!activeSubmission) return;
     try {
-      const updated = citizenService.updateSubmissionStatus(
+      const updated = await citizenService.updateSubmissionStatus(
         activeSubmission.id,
         status,
         adminNote || defaultNote
