@@ -28,8 +28,8 @@ export function CitizenFeedbackSection({ work, onCloseParentModal }) {
   const [complaintDesc, setComplaintDesc] = useState('');
   const [attachedFiles, setAttachedFiles] = useState([]);
 
-  const loadPublicFeedback = () => {
-    const all = citizenService.getSubmissions();
+  const loadPublicFeedback = async () => {
+    const all = await citizenService.getSubmissions();
     const approved = all.filter(
       (s) =>
         s.projectId === (work?.id) &&
@@ -41,7 +41,7 @@ export function CitizenFeedbackSection({ work, onCloseParentModal }) {
 
   useEffect(() => {
     loadPublicFeedback();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [work?.id]);
 
   const handleActionClick = (formType) => {
@@ -56,16 +56,30 @@ export function CitizenFeedbackSection({ work, onCloseParentModal }) {
     setActiveForm(activeForm === formType ? null : formType);
   };
 
-  const handleSimulateFileUpload = (type) => {
-    const newFile = {
-      name: type === 'video' ? `ground_video_${attachedFiles.length + 1}.mp4` : `ground_photo_${attachedFiles.length + 1}.jpg`,
-      size: type === 'video' ? '14.2 MB' : '2.1 MB',
-      type: type === 'video' ? 'video/mp4' : 'image/jpeg',
-      url: type === 'video'
-        ? 'https://assets.mixkit.co/videos/preview/mixkit-construction-site-worker-with-a-hard-hat-42861-large.mp4'
-        : 'https://images.unsplash.com/photo-1541888946425-d0fbb18615f3?auto=format&fit=crop&w=600&q=80',
+  const handlePhotoChange = (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setNotice('Please select an image file (JPG, PNG, or WebP).');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setNotice('Photo must be smaller than 5 MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setAttachedFiles((files) => [...files, {
+        name: file.name,
+        size: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
+        type: file.type,
+        url: reader.result,
+      }]);
     };
-    setAttachedFiles([...attachedFiles, newFile]);
+    reader.readAsDataURL(file);
   };
 
   const handleRemoveFile = (index) => {
@@ -91,21 +105,22 @@ export function CitizenFeedbackSection({ work, onCloseParentModal }) {
       status: SUBMISSION_STATUS.SUBMITTED,
       rating: ratingVal,
       content: `Rating: ${ratingVal} / 5 (${ratingCategory}) for ${work.projectName || work.title}`,
-      evidence: [],
+      evidence: attachedFiles,
       aiCorrelation: 'Baseline rating aggregated into project community score.',
       timeline: [{ step: 'Submitted', date: new Date().toISOString().replace('T', ' ').substring(0, 16), done: true, note: 'Submitted — Awaiting Review' }],
     });
 
     setNotice('Rating submitted successfully. Status: Submitted — Awaiting Review');
+    setAttachedFiles([]);
     setActiveForm(null);
     setTimeout(() => setNotice(''), 4000);
   };
 
-  const handleSubmitComment = (e) => {
+  const handleSubmitComment = async (e) => {
     e.preventDefault();
     if (!commentText.trim()) return;
 
-    citizenService.addSubmission({
+    await citizenService.addSubmission({
       id: `SUB-${Date.now()}`,
       referenceId: `MPL-CIT-2026-${Math.floor(100000 + Math.random() * 900000)}`,
       type: 'COMMENT',
@@ -122,13 +137,14 @@ export function CitizenFeedbackSection({ work, onCloseParentModal }) {
       status: SUBMISSION_STATUS.SUBMITTED,
       rating: null,
       content: commentText.trim(),
-      evidence: [],
+      evidence: attachedFiles,
       aiCorrelation: 'Pending moderation before publication on public project ledger.',
       timeline: [{ step: 'Submitted', date: new Date().toISOString().replace('T', ' ').substring(0, 16), done: true, note: 'Submitted — Awaiting Review' }],
     });
 
     setNotice('Comment submitted successfully. Status: Submitted');
     setCommentText('');
+    setAttachedFiles([]);
     setActiveForm(null);
     setTimeout(() => setNotice(''), 4000);
   };
@@ -168,6 +184,33 @@ export function CitizenFeedbackSection({ work, onCloseParentModal }) {
     setActiveForm(null);
     setTimeout(() => setNotice(''), 4000);
   };
+
+  const renderPhotoPicker = () => (
+    <div>
+      <label style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem' }}>
+        Attach Photo Evidence (JPG, PNG, WebP; max 5 MB):
+      </label>
+      <label className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.3rem 0.6rem', fontSize: '0.72rem', cursor: 'pointer' }}>
+        <i className="fa-solid fa-camera"></i> Choose Photo
+        <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePhotoChange} style={{ display: 'none' }} />
+      </label>
+      {attachedFiles.length > 0 && (
+        <div style={{ marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          {attachedFiles.map((file, index) => (
+            <div key={`${file.name}-${index}`} style={{ position: 'relative', width: '92px' }}>
+              <img src={file.url} alt={file.name} style={{ width: '92px', height: '68px', objectFit: 'cover', borderRadius: 4, border: '1px solid var(--border-light)' }} />
+              <button type="button" aria-label={`Remove ${file.name}`} onClick={() => handleRemoveFile(index)} style={{ position: 'absolute', top: 2, right: 2, width: 20, height: 20, border: 0, borderRadius: '50%', background: 'rgba(15, 23, 42, 0.8)', color: '#fff', cursor: 'pointer' }}>
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+              <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                {file.name}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div style={{ marginTop: '1.25rem', borderTop: '1px solid var(--border-light)', paddingTop: '1.2rem' }}>
@@ -265,6 +308,8 @@ export function CitizenFeedbackSection({ work, onCloseParentModal }) {
             </select>
           </div>
 
+          {renderPhotoPicker()}
+
           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
             <button type="button" className="btn-secondary" onClick={() => setActiveForm(null)} style={{ fontSize: '0.75rem' }}>
               Cancel
@@ -308,6 +353,8 @@ export function CitizenFeedbackSection({ work, onCloseParentModal }) {
               <option value="General Feedback">General Feedback</option>
             </select>
           </div>
+
+          {renderPhotoPicker()}
 
           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
             <button type="button" className="btn-secondary" onClick={() => setActiveForm(null)} style={{ fontSize: '0.75rem' }}>
@@ -357,50 +404,7 @@ export function CitizenFeedbackSection({ work, onCloseParentModal }) {
             />
           </div>
 
-          {/* ATTACH EVIDENCE */}
-          <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
-              Attach Photo / Video Proof (JPG, PNG, WebP, MP4):
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => handleSimulateFileUpload('photo')}
-                style={{ padding: '0.3rem 0.6rem', fontSize: '0.72rem' }}
-              >
-                <i className="fa-solid fa-camera"></i> Attach Photo
-              </button>
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={() => handleSimulateFileUpload('video')}
-                style={{ padding: '0.3rem 0.6rem', fontSize: '0.72rem' }}
-              >
-                <i className="fa-solid fa-video"></i> Attach Video
-              </button>
-            </div>
-
-            {attachedFiles.length > 0 && (
-              <div style={{ marginTop: '0.4rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-                {attachedFiles.map((f, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', background: '#fff', padding: '0.3rem 0.5rem', borderRadius: 4, border: '1px solid var(--border-light)' }}>
-                    <span>
-                      <i className={`fa-solid ${f.type.startsWith('video') ? 'fa-video' : 'fa-image'}`} style={{ marginRight: 4, color: 'var(--saffron)' }}></i>
-                      {f.name} ({f.size})
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFile(i)}
-                      style={{ background: 'none', border: 'none', color: 'var(--risk-critical)', cursor: 'pointer' }}
-                    >
-                      <i className="fa-solid fa-xmark"></i>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {renderPhotoPicker()}
 
           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
             <button type="button" className="btn-secondary" onClick={() => setActiveForm(null)} style={{ fontSize: '0.75rem' }}>
@@ -492,6 +496,18 @@ export function CitizenFeedbackSection({ work, onCloseParentModal }) {
                   <p style={{ fontSize: '0.78rem', color: 'var(--text-main)', margin: 0, lineHeight: 1.4 }}>
                     {fb.content}
                   </p>
+                  {fb.evidence?.some((file) => file.type?.startsWith('image/')) && (
+                    <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.55rem', flexWrap: 'wrap' }}>
+                      {fb.evidence.filter((file) => file.type?.startsWith('image/')).slice(0, 3).map((file, index) => (
+                        <img
+                          key={`${file.name}-${index}`}
+                          src={file.url}
+                          alt={`Evidence submitted with feedback: ${file.name}`}
+                          style={{ width: '72px', height: '52px', objectFit: 'cover', borderRadius: 4, border: '1px solid var(--border-light)' }}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })}
