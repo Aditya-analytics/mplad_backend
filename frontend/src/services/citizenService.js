@@ -13,9 +13,11 @@ export const SUBMISSION_STATUS = {
 const NOTIFS_KEY = 'mplads_admin_notifs';
 
 export const citizenService = {
-  async getSubmissions() {
+  async getSubmissions(projectId = '') {
     try {
-      const response = await apiClient.get('/citizen/submissions');
+      const response = await apiClient.get('/citizen/submissions', {
+        params: projectId ? { projectId } : undefined,
+      });
       return response.data;
     } catch (error) {
       console.error('Error fetching submissions', error);
@@ -36,7 +38,7 @@ export const citizenService = {
   async addSubmission(newSub) {
     try {
       const response = await apiClient.post('/citizen/submissions', newSub);
-      
+
       // Keep local notifications for admin prototype
       this.addAdminNotification({
         id: `notif-${Date.now()}`,

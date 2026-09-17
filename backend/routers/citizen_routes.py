@@ -1,7 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import datetime
+import json
+import os
+from pathlib import Path
 import uuid
 
 router = APIRouter(prefix="/api/v1/citizen", tags=["Citizen"])
@@ -78,6 +81,34 @@ citizen_db = [
     }
 ]
 
+SUBMISSIONS_FILE = Path(__file__).resolve().parents[2] / "data" / "citizen_submissions.json"
+
+def _save_submissions():
+    """Persist feedback so it survives backend restarts."""
+    SUBMISSIONS_FILE.parent.mkdir(parents=True, exist_ok=True)
+    temporary_file = SUBMISSIONS_FILE.with_suffix(".tmp")
+    temporary_file.write_text(json.dumps(citizen_db, ensure_ascii=False, indent=2), encoding="utf-8")
+    os.replace(temporary_file, SUBMISSIONS_FILE)
+
+def _load_submissions():
+    """Load persisted feedback, retaining demo records on first startup."""
+    global citizen_db
+    if not SUBMISSIONS_FILE.exists():
+        _save_submissions()
+        return
+    try:
+        citizen_db = json.loads(SUBMISSIONS_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        _save_submissions()
+
+_load_submissions()
+
+class EvidenceItem(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+    size: str = Field(min_length=1, max_length=32)
+    type: str = Field(pattern=r"^image/(jpeg|png|webp)$")
+    url: str = Field(min_length=1)
+
 class SubmissionCreate(BaseModel):
     type: str
     projectId: str
@@ -90,16 +121,19 @@ class SubmissionCreate(BaseModel):
     district: str
     state: str
     content: str
-    rating: Optional[int] = None
+    rating: Optional[int] = Field(default=None, ge=1, le=5)
     categoriesRating: Optional[dict] = None
-    evidence: Optional[list] = []
+    evidence: list[EvidenceItem] = Field(default_factory=list, max_length=5)
 
 @router.get("/submissions")
-def get_submissions(email: Optional[str] = None):
-    """Get all submissions, optionally filtered by email"""
+def get_submissions(email: Optional[str] = None, projectId: Optional[str] = None):
+    """Get submissions filtered by citizen email and/or project ID."""
+    submissions = citizen_db
     if email:
-        return [sub for sub in citizen_db if sub["citizenEmail"] == email]
-    return citizen_db
+        submissions = [sub for sub in submissions if sub["citizenEmail"] == email]
+    if projectId:
+        submissions = [sub for sub in submissions if str(sub["projectId"]) == str(projectId)]
+    return submissions
 
 @router.post("/submissions")
 def create_submission(submission: SubmissionCreate):
@@ -124,7 +158,7 @@ def create_submission(submission: SubmissionCreate):
         "rating": submission.rating,
         "categoriesRating": submission.categoriesRating,
         "content": submission.content,
-        "evidence": submission.evidence,
+        "evidence": [item.model_dump() for item in submission.evidence],
         "aiCorrelation": "Pending AI Analysis",
         "timeline": [
             { "step": "Submitted", "date": datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M'), "done": True, "note": "Submitted by citizen" }
@@ -132,6 +166,7 @@ def create_submission(submission: SubmissionCreate):
     }
     
     citizen_db.insert(0, new_sub) # Add to top
+    _save_submissions()
     return new_sub
 
 @router.delete("/submissions/{sub_id}")
@@ -142,6 +177,7 @@ def delete_submission(sub_id: str, email: str):
         if sub["id"] == sub_id:
             if sub["citizenEmail"] == email:
                 deleted = citizen_db.pop(idx)
+                _save_submissions()
                 return {"status": "success", "message": "Deleted successfully"}
             else:
                 raise HTTPException(status_code=403, detail="Unauthorized")
@@ -160,6 +196,7 @@ def update_submission_status(sub_id: str, status: str):
                     "done": True,
                     "note": "Admin action"
                 })
+                _save_submissions()
                 return sub
             else:
                 raise HTTPException(status_code=400, detail="Invalid status")

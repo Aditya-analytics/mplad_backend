@@ -1,1 +1,4 @@
 venv
+data/citizen_submissions.json
+__pycache__/
+*.py[cod]

@@ -29,7 +29,7 @@ export function CitizenFeedbackSection({ work, onCloseParentModal }) {
   const [attachedFiles, setAttachedFiles] = useState([]);
 
   const loadPublicFeedback = async () => {
-    const all = await citizenService.getSubmissions();
+    const all = await citizenService.getSubmissions(work?.id);
     const approved = all.filter(
       (s) =>
         s.projectId === (work?.id) &&
