@@ -74,12 +74,14 @@ export function AppRoutes() {
           <Route path={ROUTES.PROJECT_DETAILS} element={<ProjectDetailsPage />} />
           <Route path={ROUTES.CITIZEN_PARTICIPATION} element={<CitizenParticipationPage />} />
 
-          {/* Admin-only routes */}
-          <Route path={ROUTES.ANOMALIES_DUPLICATES} element={<AdminOnly><DuplicatesPage /></AdminOnly>} />
-          <Route path={ROUTES.ANOMALIES_COSTS} element={<AdminOnly><CostsPage /></AdminOnly>} />
-          <Route path={ROUTES.ANOMALIES_DELAYS} element={<AdminOnly><DelaysPage /></AdminOnly>} />
-          <Route path={ROUTES.ANOMALIES_COMPLIANCE} element={<AdminOnly><CompliancePage /></AdminOnly>} />
-          <Route path={ROUTES.ANOMALY_DETAILS} element={<AdminOnly><AnomalyDetailsPage /></AdminOnly>} />
+          {/* Core AI Intelligence Engines (Accessible to both Citizens & Admins) */}
+          <Route path={ROUTES.ANOMALIES_DUPLICATES} element={<DuplicatesPage />} />
+          <Route path={ROUTES.ANOMALIES_COSTS} element={<CostsPage />} />
+          <Route path={ROUTES.ANOMALIES_DELAYS} element={<DelaysPage />} />
+          <Route path={ROUTES.ANOMALIES_COMPLIANCE} element={<CompliancePage />} />
+          <Route path={ROUTES.ANOMALY_DETAILS} element={<AnomalyDetailsPage />} />
+
+          {/* Admin-only Governance & Audit routes */}
           <Route path={ROUTES.ANALYTICS} element={<AdminOnly><AnalyticsPage /></AdminOnly>} />
           <Route path={ROUTES.ALERTS} element={<AdminOnly><AlertsPage /></AdminOnly>} />
           <Route path={ROUTES.REPORTS} element={<AdminOnly><ReportsPage /></AdminOnly>} />

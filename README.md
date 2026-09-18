@@ -27,58 +27,133 @@ The MPLAD scheme manages thousands of localized community projects (roads, schoo
 
 ## 2. Core Features of the Solution
 
-An ideal platform will act as an intelligent layer sitting on top of the existing MPLADS database.
+An intelligent risk triage and transparency platform sitting on top of the MPLADS ecosystem, powered by 4 core intelligence engines integrated across both citizen and administrative dashboards:
 
-1. **Smart Anomaly Detection:** Automatically flags projects where the proposed cost is significantly higher than historical averages for similar works in the same geography.
-2. **Duplicate Project Spotter:** Uses text analysis on project titles and descriptions to alert authorities if a similar project was already sanctioned in the same village/ward.
-3. **Delay Prediction Engine:** Predicts which projects are at high risk of stalling based on historical implementing agency performance, vendor track record, and weather/geography data.
-4. **Automated Compliance Checker:** Rules-based engine that ensures fund installments are only released when mandated milestones (e.g., 50% completion) are verifiably met.
-5. **Role-Based Dashboards:** Custom views for MPs (to track their recommended works), District Collectors (for ground-level execution), and MoSPI (for macro-level national monitoring).
+### A. Core Intelligence Engines (Integrated in Both Dashboards)
+1. **Smart Anomaly Detection:** Unsupervised Isolation Forest models automatically flag projects where proposed expenditure or duration deviates significantly from historical regional benchmarks.
+2. **Duplicate Project Spotter (NLP):** Natural Language Processing (TF-IDF N-grams & Cosine Similarity) compares project titles and descriptions to detect duplicate or ghost works sanctioned in the same ward/panchayat.
+3. **Delay Prediction Engine:** Evaluates completion probability and flags projects at high risk of stalling based on implementing agency track records and historical delivery timelines.
+4. **Automated Compliance Checker:** Rules-based engine verifying MoSPI guideline adherence and ensuring installment disbursements are bound to verified milestone deliverables.
 
 ---
 
-## 3. The AI & Analytics Engine (The "Brain")
+### B. Role-Specific Dashboards & Capabilities
 
-This is how the AI models will specifically tackle the requirements:
+#### 1. Chief Administrator Portal (Governance, Audit & Enforcement)
+* **Risk Triage Console:** Prioritized queue of flagged high-risk projects requiring administrative review or fund disbursement freezes.
+* **NLP Duplicate Inspector:** Deep-dive side-by-side text analysis comparing new proposals against historical ward databases.
+* **Citizen Grievance Triage Queue:** Aggregates and prioritizes ground-level complaints and low-rated works for physical site inspections.
+* **Defensible Audit Trail Generator:** Produces human-readable evidence logs detailing the exact mathematical and heuristic trigger reasons behind every alert.
+
+#### 2. Citizen Transparency Portal (Civic Oversight & Ground Truth)
+* **Constituency Fund Explorer:** Complete public visibility into recommended works, sanctioned amounts, expenditure, and live AI risk flags in local neighborhoods.
+* **Interactive GIS Mapping:** Geospatial visualization of community assets (roads, water tanks, schools) showing progress, expenditure, and status.
+* **Project Rating System (1–5 Stars):** Community quality scoring allowing residents to rate delivered infrastructure.
+* **Public Comments & Ground Truth:** Direct civic discussions allowing locals to verify whether sanctioned assets physically exist and function.
+* **Geo-Tagged Grievance Reporting:** Direct channel for citizens to lodge complaints against stalled works, sub-standard materials, or ghost projects.
+
+---
+
+## 3. System Architecture & Technical Flow
+
+```mermaid
+flowchart LR
+    %% Data Layer
+    subgraph S1 ["1. Data Layer"]
+        direction TB
+        D1["Real-Time MPLADS<br/>Official Dataset"]
+        T1["`**Tech:** Python, BeautifulSoup, Requests, Pandas`"]
+        D1 -.-> T1
+    end
+
+    %% AI & Analytics Engine
+    subgraph S2 ["2. AI & Analytics Engine"]
+        direction TB
+        P1["Data Ingestion & Preprocessing"]
+        P2["Duplicate Project Spotter<br/>(TF-IDF / Cosine Similarity)"]
+        P3["Financial Anomaly Detector<br/>(Isolation Forest)"]
+        P4["Delay Prediction Engine<br/>(XGBoost / Random Forest)"]
+        P5["Automated Compliance Checker<br/>(Milestone Rule Engine)"]
+        T2["`**Tech:** Scikit-Learn, XGBoost, NumPy, NLTK`"]
+        
+        P1 --> P2 & P3 & P4 & P5
+        P5 -.-> T2
+    end
+
+    %% Backend & Core
+    subgraph S3 ["3. Backend & Core"]
+        direction TB
+        B1[(PostgreSQL / SQLite)]
+        B2["FastAPI REST Services"]
+        B3["Audit Trail & Scoring Engine"]
+        T3["`**Tech:** FastAPI, Uvicorn, SQLAlchemy, Pydantic`"]
+        
+        B1 --> B2 --> B3
+        B3 -.-> T3
+    end
+
+    %% Presentation Layer
+    subgraph S4 ["4. Presentation Layer"]
+        direction TB
+        U1["Chief Administrator Portal<br/>(Risk Triage & Duplicate Inspector)"]
+        U2["Citizen Transparency Portal<br/>(GIS Map, Ratings, Comments & Complaints)"]
+        T4["`**Tech:** React 18, Vite, Tailwind CSS, Leaflet GIS`"]
+        
+        U1 & U2 -.-> T4
+    end
+
+    %% Pipeline Connections
+    D1 -- "Webscraping / API" --> P1
+    P2 & P3 & P4 & P5 --> B1
+    B3 --> U1 & U2
+
+    %% Styling
+    classDef src fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A;
+    classDef ai fill:#FEF3C7,stroke:#D97706,stroke-width:2px,color:#78350F;
+    classDef be fill:#F3E8FF,stroke:#9333EA,stroke-width:2px,color:#581C87;
+    classDef ui fill:#ECFDF5,stroke:#059669,stroke-width:2px,color:#064E3B;
+    classDef tech fill:#F8FAFC,stroke:#64748B,stroke-dasharray: 4 4,color:#334155,font-size:11px;
+
+    class D1 src;
+    class P1,P2,P3,P4,P5 ai;
+    class B1,B2,B3 be;
+    class U1,U2 ui;
+    class T1,T2,T3,T4 tech;
+```
+
+---
+
+## 4. The AI & Analytics Engine (The "Brain")
 
 | Use Case | AI/ML Technique | How it Works |
 | --- | --- | --- |
-| **Detecting Financial Anomalies** | Isolation Forests / Autoencoders | Identifies statistical outliers in fund allocation. *Example: A standard bus shelter costs ₹2 Lakhs, but a new proposal asks for ₹8 Lakhs.* |
-| **Spotting Duplicate Works** | NLP (BERT Embeddings / TF-IDF) | Compares text of new proposals against past projects. *Example: "Construction of Road in Village X" matches "Laying of CC Road in X Village."* |
-| **Predicting Project Delays** | XGBoost / Random Forest | Analyzes past completion times of specific contractors and project types to assign a "Delay Risk Score" to ongoing works. |
-
-
----
-
-## 4. End-to-End System Workflow
-
-1. **Data Ingestion & Integration:** Extracting raw data.
-The system connects to the existing MPLADS portal via APIs to pull historical and real-time data on sanctions, expenditures, contractor details, and progress reports.
-
-
-2. **Data Cleaning & Preprocessing:** Standardizing formats.
-Raw data is cleaned. Missing values are handled, and text descriptions are standardized (e.g., translating regional language inputs to English using NLP) for uniform analysis.
-
-
-3. **AI Processing & Risk Scoring:** The core analysis.
-The ML models run in the background. Every project, payment request, and contractor is evaluated. The system assigns a "Risk Factor" (Low, Medium, High) to various parameters.
-
-
-4. **Alert Generation:** Proactive monitoring.
-If a project crosses a risk threshold (e.g., 90% text match with an old project, or 40% cost overrun), the system automatically triggers SMS/Email alerts to the relevant District Nodal Authority.
-
-
-5. **Dashboard Visualization:** Actionable insights.
-Data is pushed to visual dashboards where officials can view heatmaps of delayed projects, charts of fund utilization, and click into individual "High-Risk" flagged items for manual audit.
-
+| **Detecting Financial Anomalies** | Isolation Forests / Outlier Ensembles | Identifies statistical outliers in fund allocation. *Example: A standard community hall costs ₹15 Lakhs, but a proposal requests ₹48 Lakhs.* |
+| **Spotting Duplicate Works** | NLP (TF-IDF N-Grams + Cosine Sim / Embeddings) | Vectorizes work descriptions across historical databases to catch identical or reworded projects in the same geographic bounds. |
+| **Predicting Project Delays** | XGBoost / Random Forest Classifiers | Analyzes past execution duration across implementing agency types and work classifications to score completion risk. |
+| **Compliance & Audit Verification** | Deterministic Milestone & Rule Engine | Enforces MoSPI guideline compliance, installment release conditions, and milestone validation before fund disbursement. |
 
 ---
 
-## 5. Recommended Technology Stack
+## 5. End-to-End System Workflow
 
-* **Data Pipeline & Processing:** Apache Kafka (for real-time data streaming), Apache Spark, or Python (Pandas/NumPy).
-* **Machine Learning:** Python (Scikit-Learn for anomaly detection, HuggingFace/Spacy for NLP, TensorFlow/PyTorch for computer vision).
-* **Backend Server:** Node.js, Django, or FastAPI.
-* **Database:** PostgreSQL (Relational data) + MongoDB (Unstructured project documents) + Neo4j (Graph database to map relationships between contractors, projects, and locations to catch organized fraud).
-* **Frontend UI:** React.js or Angular (with charting libraries like Chart.js or D3.js).
-* **Cloud & Deployment:** AWS, Azure, or NIC Cloud (MeghRaj), using Docker for containerization.
+1. **Data Ingestion & Integration:** 
+   Connects to the official MPLADS portal via Web Scraping / APIs to ingest real-time and historical datasets (works recommended, sanctioned, expenditure, and status).
+2. **Data Cleansing & Preprocessing:** 
+   Sanitizes and normalizes records, handles missing fields, and standardizes localized project descriptions for vector analysis.
+3. **AI Processing & Risk Scoring:** 
+   NLP and ML models score every incoming project and transaction against historical benchmarks, assigning an explainable Risk Score (Low, Medium, High).
+4. **Audit Trail & Alert Generation:** 
+   Flagged projects generate deterministic audit evidence explaining the trigger reason (e.g., *92% duplicate text match with Work #84920 in Ward 4*).
+5. **Role-Based Visualization & Civic Feedback:** 
+   Actionable triage interface for the **Chief Administrator** to inspect anomalies and citizen complaints, alongside a public portal for **Citizens** to track fund delivery, rate completed works (1–5 stars), post public comments, and lodge complaints for ground-level audit verification.
+
+---
+
+## 6. Technology Stack
+
+* **Data Pipeline & Processing:** Web Scraping / API for real-time MPLADS data, Python (`Pandas`, `NumPy`, `Requests`, `BeautifulSoup`).
+* **Machine Learning & NLP:** Python (`Scikit-Learn` for Isolation Forest & TF-IDF vectorization, `XGBoost`, `NLTK`).
+* **Backend Framework:** `FastAPI` (Python async microservices) & `Node.js`.
+* **Database & ORM:** `PostgreSQL` / `SQLite` with `SQLAlchemy`.
+* **Frontend UI:** `React 18`, `Vite`, `Tailwind CSS`, and `Leaflet GIS` (for constituency mapping).
+* **Cloud & Deployment (Roadmap):** Containerized via `Docker`, ready for NIC Cloud (MeghRaj) / AWS / Azure.

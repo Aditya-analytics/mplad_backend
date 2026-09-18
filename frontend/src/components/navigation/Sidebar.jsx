@@ -18,6 +18,15 @@ export function Sidebar({ onToggleCollapse, onCloseMobile }) {
           ],
         },
         {
+          category: 'AI Transparency Engines',
+          items: [
+            { label: 'Duplicate Radar (NLP)', path: ROUTES.ANOMALIES_DUPLICATES, icon: 'fa-copy', badge: 'HIGH' },
+            { label: 'Cost Outliers (ML)', path: ROUTES.ANOMALIES_COSTS, icon: 'fa-money-bill-wave' },
+            { label: 'Delay Predictor', path: ROUTES.ANOMALIES_DELAYS, icon: 'fa-clock-rotate-left' },
+            { label: 'Compliance Audit', path: ROUTES.ANOMALIES_COMPLIANCE, icon: 'fa-scale-balanced', badge: 'CRITICAL' },
+          ],
+        },
+        {
           category: 'Citizen Portal',
           items: [
             {

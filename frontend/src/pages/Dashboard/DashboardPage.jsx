@@ -281,6 +281,152 @@ export function DashboardPage() {
         </div>
       </div>
 
+      {/* CORE AI INTELLIGENCE ENGINES (ACCESSIBLE TO CITIZENS & ADMINISTRATORS) */}
+      <div style={{ marginBottom: '2.5rem' }}>
+        <div className="section-header" style={{ marginBottom: '0.8rem' }}>
+          <h2 className="section-title">
+            <i className="fa-solid fa-microchip" style={{ color: 'var(--saffron-primary)' }}></i> Core AI Intelligence Engines
+          </h2>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            Transparent algorithmic auditing accessible to both Citizens and Public Authorities
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+          {/* Card 1: Duplicate Radar */}
+          <div
+            className="dashboard-card"
+            style={{
+              padding: '1.25rem',
+              cursor: 'pointer',
+              borderTop: '3px solid #3B82F6',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+            onClick={() => navigate(ROUTES.ANOMALIES_DUPLICATES)}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: '#EFF6FF', color: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>
+                  <i className="fa-solid fa-copy"></i>
+                </div>
+                <span className="badge-risk high" style={{ fontSize: '0.65rem' }}>NLP Active</span>
+              </div>
+              <h4 style={{ margin: '0 0 0.35rem', fontSize: '0.95rem', fontWeight: 700, color: 'var(--navy-primary)' }}>
+                Duplicate Project Spotter
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                TF-IDF vectorizer &amp; Cosine Similarity to detect duplicate or ghost works sanctioned in the same ward.
+              </p>
+            </div>
+            <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#2563EB', fontSize: '0.8rem', fontWeight: 700 }}>
+              Launch Duplicate Radar <i className="fa-solid fa-arrow-right"></i>
+            </div>
+          </div>
+
+          {/* Card 2: Cost Outlier */}
+          <div
+            className="dashboard-card"
+            style={{
+              padding: '1.25rem',
+              cursor: 'pointer',
+              borderTop: '3px solid #EF4444',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+            onClick={() => navigate(ROUTES.ANOMALIES_COSTS)}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: '#FEE2E2', color: '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>
+                  <i className="fa-solid fa-money-bill-wave"></i>
+                </div>
+                <span className="badge-risk critical" style={{ fontSize: '0.65rem' }}>Isolation Forest</span>
+              </div>
+              <h4 style={{ margin: '0 0 0.35rem', fontSize: '0.95rem', fontWeight: 700, color: 'var(--navy-primary)' }}>
+                Smart Anomaly Detection
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                Unsupervised statistical outlier detection flagging suspicious cost inflation against regional norms.
+              </p>
+            </div>
+            <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#DC2626', fontSize: '0.8rem', fontWeight: 700 }}>
+              Inspect Cost Outliers <i className="fa-solid fa-arrow-right"></i>
+            </div>
+          </div>
+
+          {/* Card 3: Delay Predictor */}
+          <div
+            className="dashboard-card"
+            style={{
+              padding: '1.25rem',
+              cursor: 'pointer',
+              borderTop: '3px solid #F59E0B',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+            onClick={() => navigate(ROUTES.ANOMALIES_DELAYS)}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: '#FEF3C7', color: '#D97706', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>
+                  <i className="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <span className="badge-risk moderate" style={{ fontSize: '0.65rem' }}>Random Forest</span>
+              </div>
+              <h4 style={{ margin: '0 0 0.35rem', fontSize: '0.95rem', fontWeight: 700, color: 'var(--navy-primary)' }}>
+                Delay Prediction Engine
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                Evaluates agency completion track records to predict stalled projects and completion risk early.
+              </p>
+            </div>
+            <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#D97706', fontSize: '0.8rem', fontWeight: 700 }}>
+              View Delay Forecasts <i className="fa-solid fa-arrow-right"></i>
+            </div>
+          </div>
+
+          {/* Card 4: Compliance Checker */}
+          <div
+            className="dashboard-card"
+            style={{
+              padding: '1.25rem',
+              cursor: 'pointer',
+              borderTop: '3px solid #10B981',
+              transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+            onClick={() => navigate(ROUTES.ANOMALIES_COMPLIANCE)}
+          >
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: '#ECFDF5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem' }}>
+                  <i className="fa-solid fa-scale-balanced"></i>
+                </div>
+                <span className="badge-risk low" style={{ fontSize: '0.65rem' }}>Rules Engine</span>
+              </div>
+              <h4 style={{ margin: '0 0 0.35rem', fontSize: '0.95rem', fontWeight: 700, color: 'var(--navy-primary)' }}>
+                Automated Compliance Checker
+              </h4>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>
+                Enforces MoSPI guidelines, milestone completion, and release conditions before installment disbursement.
+              </p>
+            </div>
+            <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.3rem', color: '#059669', fontSize: '0.8rem', fontWeight: 700 }}>
+              Audit Compliance Rules <i className="fa-solid fa-arrow-right"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* STATE SCROLLER */}
       <div className="section-header">
         <h2 className="section-title"><i className="fa-solid fa-map-pin"></i> State-wise Governance Overview</h2>

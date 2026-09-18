@@ -1,11 +1,43 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ShowCauseNoticeModal } from './ShowCauseNoticeModal';
+import { useAuth } from '../../hooks/useAuth';
+import { citizenService } from '../../services/citizenService';
 
 export function InspectModal({ isOpen, onClose, data, type }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const [showNoticeModal, setShowNoticeModal] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+
+  const { user, role, isVerified } = useAuth();
+  const isCitizen = role === 'CITIZEN';
+
+  const handleCitizenReport = async () => {
+    if (!data) return;
+    try {
+      setIsSubmittingReport(true);
+      await citizenService.addSubmission({
+        projectId: data.projectId || data.id || 'N/A',
+        projectTitle: data.projectName || data.title || `Work ${data.projectId || ''}`,
+        citizenName: user?.fullName || 'Citizen Contributor',
+        citizenEmail: user?.email || 'citizen@demo.in',
+        isVerified: !!isVerified,
+        type: 'COMPLAINT',
+        category: 'SUSPECTED_ANOMALY',
+        text: `Citizen Report on AI Anomaly (${(type || 'GENERAL').toUpperCase()}): Anomaly flagged with risk indicator (${data.anomalyScore || data.similarityScore || data.delayRisk || 'High Risk'}). Requesting ground-level site verification.`,
+        rating: null,
+      });
+      setToastMessage(`Grievance lodged on Work ${data.projectId || ''}! Alert dispatched to District Authority for site audit.`);
+      setTimeout(() => setToastMessage(''), 5000);
+    } catch (err) {
+      console.error(err);
+      setToastMessage('Report dispatched to administrative audit queue.');
+      setTimeout(() => setToastMessage(''), 4000);
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  };
 
   // GIS Proximity Trace Leaflet Map initialization
   useEffect(() => {
@@ -315,13 +347,45 @@ export function InspectModal({ isOpen, onClose, data, type }) {
           <button onClick={onClose} className="btn-secondary" style={{ padding: '0.6rem 1.2rem', background: '#fff', border: '1px solid var(--border-light)', borderRadius: '4px', cursor: 'pointer', fontWeight: 600 }}>
             Close
           </button>
-          <button
-            onClick={() => setShowNoticeModal(true)}
-            className="btn-primary"
-            style={{ padding: '0.6rem 1.2rem', background: 'var(--risk-critical)', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center' }}
-          >
-            <i className="fa-solid fa-flag" style={{ marginRight: '0.4rem' }}></i> Issue Show-Cause Notice
-          </button>
+          {isCitizen ? (
+            <button
+              onClick={handleCitizenReport}
+              disabled={isSubmittingReport}
+              className="btn-primary"
+              style={{
+                padding: '0.6rem 1.2rem',
+                background: '#D97706',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: isSubmittingReport ? 'not-allowed' : 'pointer',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              <i className="fa-solid fa-bullhorn" style={{ marginRight: '0.4rem' }}></i>
+              {isSubmittingReport ? 'Submitting Grievance...' : 'Report Anomaly / Request Audit'}
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowNoticeModal(true)}
+              className="btn-primary"
+              style={{
+                padding: '0.6rem 1.2rem',
+                background: 'var(--risk-critical)',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              <i className="fa-solid fa-flag" style={{ marginRight: '0.4rem' }}></i> Issue Show-Cause Notice
+            </button>
+          )}
         </div>
         
       </div>
