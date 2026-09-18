@@ -5,6 +5,8 @@ import { useProjects } from '../../hooks/useProjects';
 import { LeafletMap } from '../../components/common/LeafletMap';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { ROUTES } from '../../constants/routes';
+import { formatDate } from '../../utils/formatDate';
+import { DeadlineActionModal } from '../../components/common/DeadlineActionModal';
 
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -62,6 +64,9 @@ export function DashboardPage() {
   const [tableSearch, setTableSearch] = useState('');
   const [stateFilter, setStateFilter] = useState('ALL');
   const [riskFilter, setRiskFilter] = useState('ALL');
+  const [deadlineWork, setDeadlineWork] = useState(null);
+  const [submittedDeadlineIds, setSubmittedDeadlineIds] = useState([]);
+  const [completedDeadlineIds, setCompletedDeadlineIds] = useState([]);
 
   // Animated counters
   const [counts, setCounts] = useState({ total: 0, delayed: 0, anomalies: 0 });
@@ -109,6 +114,36 @@ export function DashboardPage() {
     setHeroResults(matches);
     setShowHeroDropdown(true);
   }, [heroSearch, projects]);
+
+  const deadlineReminders = projects
+    .map((project) => {
+      const deadline = new Date(`${project.expectedCompletion}T00:00:00`);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const daysUntil = Math.ceil((deadline - today) / 86400000);
+      let urgency = 'NEAR DEADLINE';
+      if (daysUntil < 0) urgency = 'OVERDUE';
+      else if (daysUntil === 0) urgency = 'DUE TODAY';
+      else if (daysUntil === 1) urgency = 'DUE TOMORROW';
+      return { project, daysUntil, urgency };
+    })
+    .filter(({ daysUntil }) => daysUntil <= 7)
+    .sort((a, b) => a.daysUntil - b.daysUntil)
+    .slice(0, 8);
+
+  const deadlineLabel = ({ daysUntil, urgency }) => {
+    if (urgency === 'OVERDUE') return `${Math.abs(daysUntil)} day${Math.abs(daysUntil) === 1 ? '' : 's'} overdue`;
+    if (daysUntil === 0) return 'Due today';
+    if (daysUntil === 1) return 'Due tomorrow';
+    return `Due in ${daysUntil} days`;
+  };
+
+  const handleDeadlineSubmitted = ({ workId, action }) => {
+    setSubmittedDeadlineIds((current) => [...new Set([...current, workId])]);
+    if (action === 'COMPLETED') {
+      setCompletedDeadlineIds((current) => [...new Set([...current, workId])]);
+    }
+  };
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -281,6 +316,41 @@ export function DashboardPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* DEADLINE REMINDERS */}
+      <div className="dashboard-card deadline-reminders-card">
+        <div className="section-header deadline-reminders-header">
+          <div>
+            <h2 className="section-title"><i className="fa-solid fa-bell"></i> Deadline Reminders</h2>
+            <p className="deadline-reminders-intro">Urgent work due today, tomorrow, within 7 days, or already overdue.</p>
+          </div>
+          <span className="deadline-count">{deadlineReminders.length} alerts</span>
+        </div>
+        {deadlineReminders.length === 0 ? (
+          <div className="deadline-empty"><i className="fa-solid fa-circle-check"></i> No projects require a deadline response right now.</div>
+        ) : (
+          <div className="deadline-list">
+            {deadlineReminders.map(({ project, daysUntil, urgency }) => {
+              const completed = completedDeadlineIds.includes(project.id);
+              const submitted = submittedDeadlineIds.includes(project.id);
+              return (
+                <div className={`deadline-item ${urgency === 'OVERDUE' ? 'overdue' : ''}`} key={project.id}>
+                  <div className="deadline-item-icon"><i className={`fa-solid ${urgency === 'OVERDUE' ? 'fa-triangle-exclamation' : 'fa-clock'}`}></i></div>
+                  <div className="deadline-item-content">
+                    <div className="deadline-item-topline"><strong>{project.projectName}</strong><span className={`deadline-urgency ${urgency === 'OVERDUE' ? 'overdue' : ''}`}>{urgency}</span></div>
+                    <div className="deadline-item-meta">{project.id} · {project.district}, {project.state} · Due {formatDate(project.expectedCompletion)}</div>
+                    <div className="deadline-item-meta">{project.implementingAgency || 'Implementing agency'} · {project.vendor || 'Contractor not recorded'}</div>
+                  </div>
+                  <button className={`btn-action-sm deadline-action ${completed ? 'completed' : ''}`} disabled={submitted} onClick={() => setDeadlineWork(project)}>
+                    <i className={`fa-solid ${completed ? 'fa-circle-check' : submitted ? 'fa-check' : 'fa-arrow-right'}`}></i> {completed ? 'Completed' : submitted ? 'Submitted' : 'Respond'}
+                  </button>
+                  <span className="deadline-days">{deadlineLabel({ daysUntil, urgency })}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* MAP & REGION INTELLIGENCE */}
@@ -557,6 +627,13 @@ export function DashboardPage() {
           </table>
         </div>
       </div>
+      <DeadlineActionModal
+        work={deadlineWork}
+        deadlineLabel={deadlineWork ? deadlineLabel(deadlineReminders.find(({ project }) => project.id === deadlineWork.id) || { daysUntil: 0, urgency: 'DUE TODAY' }) : ''}
+        isOpen={Boolean(deadlineWork)}
+        onClose={() => setDeadlineWork(null)}
+        onSubmitted={handleDeadlineSubmitted}
+      />
     </section>
   );
 }
